@@ -1,0 +1,3 @@
+[submodule "thirdparty/optframe-external"]
+	path = thirdparty/optframe-external
+	url = git@github.com:optframe/optframe.git
