@@ -22,13 +22,8 @@ function create_engine_by_symbol(n::Int32)
     return @ccall $creation_symbol(n::Cint)::Ptr{Cvoid}
 end
 
-#function optframe_api1d_create_engine(n::Int32)
-#    return @ccall libpath.optframe_api1d_create_engine(n::Cint)::Ptr{Cvoid}
-#end
-
 function optframe_api0d_engine_welcome(eng::Ptr{Cvoid})
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api0d_engine_welcome")
-    # return @ccall libpath.optframe_api0d_engine_welcome(eng::Ptr{Cvoid})::Cvoid
     return @ccall $creation_symbol(eng::Ptr{Cvoid})::Cvoid
 end
 
@@ -37,7 +32,6 @@ function init_engine(ll_int::Int64)::Engine
 end
 
 function init_engine(ll_int::Int32)::Engine
-    # e = Engine(IdDict{Ptr{Cvoid},Any}(), ll_int, optframe_api1d_create_engine(ll_int))
     e = Engine(IdDict{Ptr{Cvoid},Any}(), ll_int, create_engine_by_symbol(ll_int))
     optframe_api0d_engine_welcome(e.hf)
     return e
