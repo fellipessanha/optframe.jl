@@ -1,7 +1,10 @@
 module OptFrame
 
 using Libdl
-export Engine, init_engine, welcome
+export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
+
+# global arena, instead of local Engine one
+const _global_gc_arena = IdDict{Ptr{Cvoid}, Any}()
 
 mutable struct Engine
     gc_arena::IdDict{Ptr{Cvoid},Any}
@@ -36,6 +39,72 @@ function init_engine(ll_int::Int32)::Engine
     optframe_api0d_engine_welcome(e.hf)
     return e
 end
+
+# ==================================
+
+
+function arena_count(e::Engine)
+    return length(e.gc_arena)
+end
+
+function register(e::Engine, obj::T)::Ptr{T} where T
+    ptr = Ptr{Cvoid}(pointer_from_objref(obj))
+    e.gc_arena[ptr] = obj               
+    return Ptr{T}(ptr)          
+end
+
+function unregister(e::Engine, ptr::Ptr{T}) where T
+    key = Ptr{Cvoid}(ptr)
+    if haskey(e.gc_arena, key)
+        delete!(e.gc_arena, key)
+    else
+        @warn "Ptr not found in gc_arena!"
+    end
+    return nothing
+end
+
+function global_arena_count()
+    return length(_global_gc_arena)
+end
+
+function global_register(obj::T)::Ptr{T} where T
+    ptr = Ptr{Cvoid}(pointer_from_objref(obj))
+    _global_gc_arena[ptr] = obj               
+    return Ptr{T}(ptr)          
+end
+
+function global_unregister(ptr::Ptr{T}) where T
+    key = Ptr{Cvoid}(ptr)
+    if haskey(_global_gc_arena, key)
+        delete!(_global_gc_arena, key)
+    else
+        @warn "Ptr not found in gc_arena!"
+    end
+    return nothing
+end
+
+
+# =================================
+
+# function add_constructive(e::Engine, problemCtx::Ptr{Cvoid}, constructive_callback_ptr)
+#     # constructive_callback_ptr = FUNC_FCONSTRUCTIVE(constructive_callback_julia)
+#     # const constructive_callback_ptr = @cfunction(constructive_callback_julia, Ptr{Cvoid}, (Ptr{Cvoid},))
+
+#     # pendura pointer!!!
+#     # self.register_callback(constructive_callback_ptr)
+#     #
+#     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_constructive")
+#     idx_c = @ccall $creation_symbol(Ptr{Cvoid}, n::Cint)::Ptr{Cvoid}
+
+#     idx_c = optframe_lib.optframe_api1d_add_constructive(
+#         e.hf, constructive_callback_ptr, problemCtx,
+#         self.callback_sol_deepcopy_ptr,
+#         self.callback_sol_tostring_ptr,
+#         self.callback_utils_decref_ptr)
+#     return IdConstructive(idx_c)
+# end
+
+# =================================
 
 function welcome(e::Engine)
     optframe_api0d_engine_welcome(e.hf)
