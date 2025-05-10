@@ -46,7 +46,7 @@ println("will try add_evaluator")
 
 f_ev_ptr  = @cfunction(evaluate_solution, Cdouble, (Ptr{Cvoid},Ptr{Cvoid}))
 idx_ev = add_evaluator(problem.engine, f_ev_ptr, false, Ptr{Nothing}(problem_ptr))
-println("idx_ev = ", idx_ev)
+println("created component OptFrame:GeneralEvaluator:Evaluator ", idx_ev)
 
 println("will try add_constructive")
 f_is_ptr  = @cfunction(random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
@@ -55,7 +55,8 @@ f_str_ptr = @cfunction(tostring_callback_julia_kp, Csize_t, (Ptr{Cvoid},Ptr{Ccha
 f_del_ptr = @cfunction(free_solution_kp, Cint, (Ptr{Cvoid},))
 
 idx_c = add_constructive(problem.engine, f_is_ptr, Ptr{Nothing}(problem_ptr), f_cp_ptr, f_str_ptr, f_del_ptr)
-println("idx_c = ", idx_c)
+println("created component OptFrame:Constructive ", idx_c)
+println("created component OptFrame:InitialSearch ", idx_c)
 
 
 println("testing add_ns")
@@ -92,7 +93,7 @@ decref_callback_ptr = @cfunction(free_solution_kp, Cint, (Ptr{Cvoid},))
 
 idx_ns = add_ns(problem.engine, f_nsrand_ptr, f_moveapply_ptr, f_moveeq_ptr,
    f_movecba_ptr, Ptr{Nothing}(problem_ptr), decref_callback_ptr)
-println("idx_ns = ", idx_ns)
+println("created component OptFrame:NS:FNS ", idx_ns)
 
 
 
@@ -100,10 +101,14 @@ println("idx_ns = ", idx_ns)
 #     "[ OptFrame:NS 0 ]", "OptFrame:NS[]")
 # print("list_idx=", list_idx)
 
+# OPT_MODULE_API int  // index of ComponentList
+# optframe_api1d_create_component_list(FakeEnginePtr _engine, char* clist,
+#                                     char* list_type) {
+
 
 println("try check")
 
-res = check(problem.engine, 5, 3, false)
+res = check(problem.engine, 5, 3, true)
 println("check=",res)
 
 println("Finished!")
