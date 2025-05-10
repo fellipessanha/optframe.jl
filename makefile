@@ -1,8 +1,14 @@
-all: optframe_lib_test
+all: build/optframe_lib.so
 
-optframe_lib_test:
+build/optframe_lib.so:
 	git submodule update
 	cd thirdparty/optframe-external/ && make optframe_lib_test
 	mkdir -p build/
 	mv thirdparty/optframe-external/build/*.so build/
-	cp build/*.so src/
+
+test: build/optframe_lib.so
+	cp build/*.so tests/
+	echo "Test 1"
+	cd tests && julia LoadOptFrame.jl
+	echo "Test 2"
+	cd tests && julia LoadKP.jl

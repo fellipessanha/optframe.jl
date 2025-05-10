@@ -1,7 +1,7 @@
 module OptFrame
 
 using Libdl
-export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
+export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister, add_constructive
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid}, Any}()
@@ -86,23 +86,31 @@ end
 
 # =================================
 
-# function add_constructive(e::Engine, problemCtx::Ptr{Cvoid}, constructive_callback_ptr)
-#     # constructive_callback_ptr = FUNC_FCONSTRUCTIVE(constructive_callback_julia)
-#     # const constructive_callback_ptr = @cfunction(constructive_callback_julia, Ptr{Cvoid}, (Ptr{Cvoid},))
+function optframe_api1d_add_constructive(e_ptr::Ptr{Cvoid}, constructive_callback_ptr, problemCtx::Ptr{Cvoid}, deepcopy_callback_ptr, to_string_callback_ptr, decref_callback_ptr)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_constructive")
+    return  @ccall $creation_symbol(
+        e_ptr::Ptr{Cvoid}, 
+        constructive_callback_ptr::Ptr{Cvoid},
+        problemCtx::Ptr{Cvoid},
+        deepcopy_callback_ptr::Ptr{Cvoid},
+        to_string_callback_ptr::Ptr{Cvoid},
+        decref_callback_ptr::Ptr{Cvoid}
+        )::Cint
+end
 
-#     # pendura pointer!!!
-#     # self.register_callback(constructive_callback_ptr)
-#     #
-#     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_constructive")
-#     idx_c = @ccall $creation_symbol(Ptr{Cvoid}, n::Cint)::Ptr{Cvoid}
+function add_constructive(e::Engine, constructive_callback_ptr, problemCtx::Ptr{Cvoid}, deepcopy_callback_ptr, to_string_callback_ptr, decref_callback_ptr)
+    # constructive_callback_ptr = FUNC_FCONSTRUCTIVE(constructive_callback_julia)
+    # const constructive_callback_ptr = @cfunction(constructive_callback_julia, Ptr{Cvoid}, (Ptr{Cvoid},))
 
-#     idx_c = optframe_lib.optframe_api1d_add_constructive(
-#         e.hf, constructive_callback_ptr, problemCtx,
-#         self.callback_sol_deepcopy_ptr,
-#         self.callback_sol_tostring_ptr,
-#         self.callback_utils_decref_ptr)
-#     return IdConstructive(idx_c)
-# end
+    # pendura pointer!!!
+    # self.register_callback(constructive_callback_ptr)
+    #
+    idx_c = optframe_api1d_add_constructive(e.hf, 
+    constructive_callback_ptr, problemCtx, deepcopy_callback_ptr, 
+    to_string_callback_ptr, decref_callback_ptr)
+
+    return idx_c #IdConstructive(idx_c)
+end
 
 # =================================
 

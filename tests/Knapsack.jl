@@ -1,9 +1,12 @@
 module Knapsack
 
-include("../src/Optframe.jl")
-using .OptFrame
+# no NOT load OptFrame here... leave it to parent!
+#include("../src/Optframe.jl")
+#using .OptFrame
+import ..OptFrame
 
 export KnapsackProblem, init_problem_kp, random_initial_solution, callback_sol_deepcopy_kp
+export tostring_callback_julia_kp, callback_sol_deepcopy_kp, free_solution_kp
 
 using Random: shuffle
 
@@ -37,19 +40,16 @@ function random_initial_solution(p::Ptr{KnapsackProblem})::Ptr{KnapsackSolution}
     end
 
     solution = KnapsackSolution(selection)
-    sol_raw_ptr = register(prob.engine, solution)
+    sol_raw_ptr = OptFrame.global_register(solution)
     return sol_raw_ptr
 end
 
-function free_solution(ptr::Ptr{KnapsackSolution})
-    # Wrap pointer back to a Julia reference (unsafe!)
-    # This assumes the object was allocated in Julia and not already freed
-    obj_ref = Base.unsafe_pointer_to_objref(ptr)::KnapsackSolution
-
-    # Now let GC know this is no longer needed by simply doing nothing with it
-    # And optionally forcing GC (not recommended in production)
-    GC.gc()
-    return nothing
+function free_solution_kp(ptr::Ptr{KnapsackSolution})::Int32
+    #obj_ref = Base.unsafe_pointer_to_objref(ptr)::KnapsackSolution
+    #GC.gc()
+    #return nothing
+    OptFrame.global_unregister(ptr)
+    return 0
 end
 
 const initial_solution_c = @cfunction(random_initial_solution, Ptr{KnapsackSolution}, (Ptr{KnapsackProblem},))
@@ -57,8 +57,17 @@ const initial_solution_c = @cfunction(random_initial_solution, Ptr{KnapsackSolut
 function callback_sol_deepcopy_kp(s1_ptr::Ptr{KnapsackSolution})::Ptr{KnapsackSolution}
     s1 = unsafe_load(s1_ptr)
     s2 = deepcopy(s1)
-    sol2_raw_ptr = global_register(s2)
+    sol2_raw_ptr = OptFrame.global_register(s2)
     return sol2_raw_ptr
+end
+
+
+function tostring_callback_julia_kp(sol::Ptr{KnapsackSolution}, buffer::Ptr{Cchar}, size::Csize_t)::Csize_t
+    s = "solution as string"
+    n = min(sizeof(s), size - 1)
+    unsafe_copyto!(buffer, pointer(s), n)
+    unsafe_store!(buffer + n, 0)  # null-terminate
+    return sizeof(s)
 end
 
 end # module Knapsack

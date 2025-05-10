@@ -1,5 +1,9 @@
+include("../src/Optframe.jl")
+using .OptFrame
+#
 include("./Knapsack.jl")
 using .Knapsack
+
 
 # ==================
 
@@ -28,3 +32,13 @@ println("invoking callback_sol_deepcopy_utils")
 callback_sol_deepcopy_kp(sol_ptr)
 
 println("OK")
+
+f_is_ptr  = @cfunction(random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
+f_cp_ptr  = @cfunction(callback_sol_deepcopy_kp, Ptr{Cvoid}, (Ptr{Cvoid},))
+f_str_ptr = @cfunction(tostring_callback_julia_kp, Csize_t, (Ptr{Cvoid},Ptr{Cchar}, Csize_t))
+f_del_ptr = @cfunction(free_solution_kp, Cint, (Ptr{Cvoid},))
+
+
+println("will try add_constructive")
+
+add_constructive(problem.engine, problem_ptr, f_is_ptr, f_cp_ptr, f_str_ptr, f_del_ptr)
