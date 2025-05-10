@@ -1,7 +1,8 @@
 module OptFrame
 
 using Libdl
-export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister, add_constructive
+export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
+export add_constructive, add_evaluator, check
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid}, Any}()
@@ -86,7 +87,7 @@ end
 
 # =================================
 
-function optframe_api1d_add_constructive(e_ptr::Ptr{Cvoid}, constructive_callback_ptr, problemCtx::Ptr{Cvoid}, deepcopy_callback_ptr, to_string_callback_ptr, decref_callback_ptr)
+function optframe_api1d_add_constructive(e_ptr::Ptr{Cvoid}, constructive_callback_ptr, problemCtx::Ptr, deepcopy_callback_ptr, to_string_callback_ptr, decref_callback_ptr)
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_constructive")
     return  @ccall $creation_symbol(
         e_ptr::Ptr{Cvoid}, 
@@ -98,7 +99,7 @@ function optframe_api1d_add_constructive(e_ptr::Ptr{Cvoid}, constructive_callbac
         )::Cint
 end
 
-function add_constructive(e::Engine, constructive_callback_ptr, problemCtx::Ptr{Cvoid}, deepcopy_callback_ptr, to_string_callback_ptr, decref_callback_ptr)
+function add_constructive(e::Engine, constructive_callback_ptr, problemCtx::Ptr, deepcopy_callback_ptr, to_string_callback_ptr, decref_callback_ptr)
     # constructive_callback_ptr = FUNC_FCONSTRUCTIVE(constructive_callback_julia)
     # const constructive_callback_ptr = @cfunction(constructive_callback_julia, Ptr{Cvoid}, (Ptr{Cvoid},))
 
@@ -111,6 +112,59 @@ function add_constructive(e::Engine, constructive_callback_ptr, problemCtx::Ptr{
 
     return idx_c #IdConstructive(idx_c)
 end
+
+function optframe_api1d_add_evaluator(e_ptr::Ptr{Cvoid}, ev_callback_ptr, min_or_max::Cint, problemCtx::Ptr)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_evaluator")
+    return  @ccall $creation_symbol(
+        e_ptr::Ptr{Cvoid}, 
+        ev_callback_ptr::Ptr{Cvoid},
+        min_or_max::Cint,
+        problemCtx::Ptr{Cvoid},
+        )::Cint
+end
+
+function add_evaluator(e::Engine, ev_callback_ptr, min_or_max::Bool, problemCtx::Ptr)
+    # constructive_callback_ptr = FUNC_FCONSTRUCTIVE(constructive_callback_julia)
+    # const constructive_callback_ptr = @cfunction(constructive_callback_julia, Ptr{Cvoid}, (Ptr{Cvoid},))
+
+    # pendura pointer!!!
+    # self.register_callback(constructive_callback_ptr)
+    #
+    idx_ev = optframe_api1d_add_evaluator(e.hf, 
+    ev_callback_ptr, Int32(min_or_max), problemCtx)
+
+    return idx_ev
+end
+
+function onfail(code::Cint)::Cint
+    println("Error code=",code)
+    return false 
+end
+
+default_onfail_ptr = @cfunction(onfail, Cint, (Cint,))
+
+function optframe_api1d_engine_check(e_ptr::Ptr{Cvoid}, p1::Cint, p2::Cint, verbose::Cint, onfail_callback_ptr)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_engine_check")
+    return  @ccall $creation_symbol(
+        e_ptr::Ptr{Cvoid}, 
+        p1::Cint,
+        p2::Cint,
+        verbose::Cint,
+        onfail_callback_ptr::Ptr{Cvoid},
+        )::Cint
+end
+
+function check(e::Engine, p1::Int64, p2::Int64, verbose::Bool)::Bool
+    # constructive_callback_ptr = FUNC_FCONSTRUCTIVE(constructive_callback_julia)
+    # const constructive_callback_ptr = @cfunction(constructive_callback_julia, Ptr{Cvoid}, (Ptr{Cvoid},))
+
+    # pendura pointer!!!
+    # self.register_callback(constructive_callback_ptr)
+    #
+    res = optframe_api1d_engine_check(e.hf, Int32(p1), Int32(p2), Int32(verbose), default_onfail_ptr)
+    return res
+end
+
 
 # =================================
 
