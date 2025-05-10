@@ -3,6 +3,7 @@ module OptFrame
 using Libdl
 export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
 export add_constructive, add_evaluator, check
+export add_ns
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid}, Any}()
@@ -75,13 +76,15 @@ function global_register(obj::T)::Ptr{T} where T
 end
 
 function global_unregister(ptr::Ptr{T}) where T
+# function global_unregister(ptr::Ptr{Nothing})::Bool
     key = Ptr{Cvoid}(ptr)
     if haskey(_global_gc_arena, key)
         delete!(_global_gc_arena, key)
     else
         @warn "Ptr not found in gc_arena!"
     end
-    return nothing
+    # return nothing
+    return false
 end
 
 
@@ -123,6 +126,31 @@ function add_evaluator(e::Engine, ev_callback_ptr::Ptr{Nothing}, min_or_max::Boo
     ev_callback_ptr, Int32(min_or_max), problemCtx)
     return idx_ev
 end
+
+function optframe_api1d_add_ns(e_ptr::Ptr{Cvoid}, 
+    fns_rand, fmove_apply, fmove_eq, fmove_cba, problemCtx::Ptr, decref_callback_ptr)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_ns")
+    return  @ccall $creation_symbol(
+        e_ptr::Ptr{Cvoid}, 
+        fns_rand::Ptr{Cvoid},
+        fmove_apply::Ptr{Cvoid},
+        fmove_eq::Ptr{Cvoid},
+        fmove_cba::Ptr{Cvoid},
+        problemCtx::Ptr{Cvoid},
+        decref_callback_ptr::Ptr{Cvoid}
+        )::Cint
+end
+
+function add_ns(e::Engine, fns_rand::Ptr{Nothing}, 
+    fmove_apply::Ptr{Nothing}, fmove_eq::Ptr{Nothing}, fmove_cba::Ptr{Nothing},
+    problemCtx::Ptr{Nothing}, decref_callback_ptr::Ptr{Nothing})
+    # TODO: keep function pointers?
+    idx_ns = optframe_api1d_add_ns(e.hf, 
+    fns_rand, fmove_apply, fmove_eq, fmove_cba,  problemCtx, decref_callback_ptr)
+    return idx_ns
+end
+
+# =====================================
 
 function onfail(code::Cint)::Cint
     println("Error code=",code)

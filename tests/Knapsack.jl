@@ -6,6 +6,8 @@ export KnapsackProblem, knapsack_problem_init
 export random_initial_solution, callback_sol_deepcopy_kp
 export tostring_callback_julia_kp, callback_sol_deepcopy_kp, free_solution_kp
 export evaluate_solution
+export ns_rand_bitflip, move_apply_bitflip, move_cba_bitflip, move_eq_bitflip
+export free_move_kp
 
 using Random: shuffle
 
@@ -101,5 +103,94 @@ function tostring_callback_julia_kp(sol::Ptr{KnapsackSolution}, buffer::Ptr{Ccha
     unsafe_store!(buffer + n, 0)
     return sizeof(s)
 end
+
+# =======================
+
+mutable struct MoveBitFlip
+    k::Cint
+end
+
+# TODO: remove this function! Arena should be Ptr{Nothing}!!!
+function free_move_kp(m_ptr_void::Ptr{Nothing})::Int32
+    m_ptr = convert(Ptr{MoveBitFlip}, m_ptr_void)
+    OptFrame.global_unregister(m_ptr)
+    return 0
+end
+
+function random_initial_solution(problem::KnapsackProblem)::KnapsackSolution
+    selection = falses(problem.nitems)
+    sum = 0.0
+    for i in shuffle(1:problem.nitems)
+        if sum + problem.vweights[i] <= problem.capacity
+            selection[i] = true
+            sum += problem.vweights[i]
+        end
+    end
+    return KnapsackSolution(selection)
+end
+
+function ns_rand_bitflip(problem::KnapsackProblem, solution::KnapsackSolution)::MoveBitFlip
+    k = rand(1:problem.nitems)
+    mv = MoveBitFlip(Int32(k))
+    return mv
+end
+
+function ns_rand_bitflip(p_void::Ptr{Nothing}, s_void::Ptr{Nothing})::Ptr{Nothing}
+    p = convert(Ptr{KnapsackProblem}, p_void)
+    problem = unsafe_load(p)
+    s = convert(Ptr{KnapsackSolution}, s_void)
+    solution = unsafe_load(s)
+    m = ns_rand_bitflip(problem, solution)
+    m_raw_ptr = OptFrame.global_register(m)
+    return Ptr{Nothing}(m_raw_ptr)
+end
+
+function move_apply_bitflip(problem::KnapsackProblem, m::MoveBitFlip, solution::KnapsackSolution)::MoveBitFlip
+    solution.selected[m.k] = 1 - solution.selected[m.k]
+    return MoveBitFlip(m.k)
+end
+
+function move_apply_bitflip(p_void::Ptr{Nothing}, m_void::Ptr{Nothing}, s_void::Ptr{Nothing})::Ptr{Nothing}
+    p = convert(Ptr{KnapsackProblem}, p_void)
+    problem = unsafe_load(p)
+    s = convert(Ptr{KnapsackSolution}, s_void)
+    solution = unsafe_load(s)
+    m = convert(Ptr{MoveBitFlip}, m_void)
+    m1 = unsafe_load(m)
+    m2 = move_apply_bitflip(problem, m1, solution)
+    m2_raw_ptr = OptFrame.global_register(m2)
+    return Ptr{Nothing}(m2_raw_ptr)
+end
+
+function move_cba_bitflip(problem::KnapsackProblem, m::MoveBitFlip, solution::KnapsackSolution)::Bool
+    return true
+end
+
+function move_cba_bitflip(p_void::Ptr{Nothing}, m_void::Ptr{Nothing}, s_void::Ptr{Nothing})::Int32
+    p = convert(Ptr{KnapsackProblem}, p_void)
+    problem = unsafe_load(p)
+    s = convert(Ptr{KnapsackSolution}, s_void)
+    solution = unsafe_load(s)
+    m = convert(Ptr{MoveBitFlip}, m_void)
+    m1 = unsafe_load(m)
+    return Int32(move_cba_bitflip(problem, m1, solution))
+end
+
+
+function move_eq_bitflip(problem::KnapsackProblem, m1::MoveBitFlip, m2::MoveBitFlip)::Bool
+    return m1.k == m2.k
+end
+
+function move_eq_bitflip(p_void::Ptr{Nothing}, m1_void::Ptr{Nothing}, m2_void::Ptr{Nothing})::Int32
+    p_ptr = convert(Ptr{KnapsackProblem}, p_void)
+    problem = unsafe_load(p_ptr)
+    m1_ptr = convert(Ptr{MoveBitFlip}, m1_void)
+    m1 = unsafe_load(m1_ptr)
+    m2_ptr = convert(Ptr{MoveBitFlip}, m2_void)
+    m2 = unsafe_load(m2_ptr)
+    return Int32(move_eq_bitflip(problem, m1, m2))
+end
+
+# =======================
 
 end # module Knapsack
