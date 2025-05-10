@@ -99,21 +99,15 @@ function optframe_api1d_add_constructive(e_ptr::Ptr{Cvoid}, constructive_callbac
         )::Cint
 end
 
-function add_constructive(e::Engine, constructive_callback_ptr, problemCtx::Ptr, deepcopy_callback_ptr, to_string_callback_ptr, decref_callback_ptr)
-    # constructive_callback_ptr = FUNC_FCONSTRUCTIVE(constructive_callback_julia)
-    # const constructive_callback_ptr = @cfunction(constructive_callback_julia, Ptr{Cvoid}, (Ptr{Cvoid},))
-
-    # pendura pointer!!!
-    # self.register_callback(constructive_callback_ptr)
-    #
+function add_constructive(e::Engine, constructive_callback_ptr::Ptr{Nothing}, problemCtx::Ptr{Nothing}, deepcopy_callback_ptr::Ptr{Nothing}, to_string_callback_ptr::Ptr{Nothing}, decref_callback_ptr::Ptr{Nothing})
+    # TODO: keep function pointers?
     idx_c = optframe_api1d_add_constructive(e.hf, 
     constructive_callback_ptr, problemCtx, deepcopy_callback_ptr, 
     to_string_callback_ptr, decref_callback_ptr)
-
-    return idx_c #IdConstructive(idx_c)
+    return idx_c
 end
 
-function optframe_api1d_add_evaluator(e_ptr::Ptr{Cvoid}, ev_callback_ptr, min_or_max::Cint, problemCtx::Ptr)
+function optframe_api1d_add_evaluator(e_ptr::Ptr{Cvoid}, ev_callback_ptr::Ptr{Cvoid}, min_or_max::Cint, problemCtx::Ptr{Cvoid})
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_evaluator")
     return  @ccall $creation_symbol(
         e_ptr::Ptr{Cvoid}, 
@@ -123,16 +117,10 @@ function optframe_api1d_add_evaluator(e_ptr::Ptr{Cvoid}, ev_callback_ptr, min_or
         )::Cint
 end
 
-function add_evaluator(e::Engine, ev_callback_ptr, min_or_max::Bool, problemCtx::Ptr)
-    # constructive_callback_ptr = FUNC_FCONSTRUCTIVE(constructive_callback_julia)
-    # const constructive_callback_ptr = @cfunction(constructive_callback_julia, Ptr{Cvoid}, (Ptr{Cvoid},))
-
-    # pendura pointer!!!
-    # self.register_callback(constructive_callback_ptr)
-    #
+function add_evaluator(e::Engine, ev_callback_ptr::Ptr{Nothing}, min_or_max::Bool, problemCtx::Ptr{Nothing})
+    # TODO: keep function 'ev_callback_ptr'?
     idx_ev = optframe_api1d_add_evaluator(e.hf, 
     ev_callback_ptr, Int32(min_or_max), problemCtx)
-
     return idx_ev
 end
 
@@ -155,12 +143,7 @@ function optframe_api1d_engine_check(e_ptr::Ptr{Cvoid}, p1::Cint, p2::Cint, verb
 end
 
 function check(e::Engine, p1::Int64, p2::Int64, verbose::Bool)::Bool
-    # constructive_callback_ptr = FUNC_FCONSTRUCTIVE(constructive_callback_julia)
-    # const constructive_callback_ptr = @cfunction(constructive_callback_julia, Ptr{Cvoid}, (Ptr{Cvoid},))
-
-    # pendura pointer!!!
-    # self.register_callback(constructive_callback_ptr)
-    #
+    # TODO: keep function 'default_onfail_ptr'?
     res = optframe_api1d_engine_check(e.hf, Int32(p1), Int32(p2), Int32(verbose), default_onfail_ptr)
     return res
 end

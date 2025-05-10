@@ -14,7 +14,7 @@ n = length(weights)
 
 println(n)
 
-problem = init_problem_kp(weights, profits, n, capacity, 0)
+problem = knapsack_problem_init(weights, profits, n, capacity)
 
 println("Finished!")
 println(problem.nitems)
@@ -23,42 +23,43 @@ println(problem)
 #problem_ptr = Ref(problem)
 problem_ptr = Ptr{KnapsackProblem}(pointer_from_objref(problem))
 
-sol_ptr = random_initial_solution(problem_ptr)
-println(sol_ptr)
+
+println("invoking random_initial_solution")
+
+sol = random_initial_solution(problem)
+println(sol)
 
 println("invoking callback_sol_deepcopy_utils")
 
-callback_sol_deepcopy_kp(sol_ptr)
+sol2 = callback_sol_deepcopy_kp(sol)
+
+println("sol2=",sol2)
 
 println("testing evaluator")
 
-e = evaluate_solution(problem_ptr, sol_ptr)
-println(e)
+e = evaluate_solution(problem, sol)
+println("evaluation:", e)
 
 println("OK")
 
 println("will try add_evaluator")
 
 f_ev_ptr  = @cfunction(evaluate_solution, Cdouble, (Ptr{Cvoid},Ptr{Cvoid}))
-idx_ev = add_evaluator(problem.engine, f_ev_ptr, false, problem_ptr)
+idx_ev = add_evaluator(problem.engine, f_ev_ptr, false, Ptr{Nothing}(problem_ptr))
 println("idx_ev = ", idx_ev)
 
 println("will try add_constructive")
-
 f_is_ptr  = @cfunction(random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
 f_cp_ptr  = @cfunction(callback_sol_deepcopy_kp, Ptr{Cvoid}, (Ptr{Cvoid},))
 f_str_ptr = @cfunction(tostring_callback_julia_kp, Csize_t, (Ptr{Cvoid},Ptr{Cchar}, Csize_t))
 f_del_ptr = @cfunction(free_solution_kp, Cint, (Ptr{Cvoid},))
 
-
-idx_c = add_constructive(problem.engine, f_is_ptr, problem_ptr, f_cp_ptr, f_str_ptr, f_del_ptr)
+idx_c = add_constructive(problem.engine, f_is_ptr, Ptr{Nothing}(problem_ptr), f_cp_ptr, f_str_ptr, f_del_ptr)
 println("idx_c = ", idx_c)
-
 
 println("try check")
 
-
-res = check(problem.engine,10, 100, true)
+res = check(problem.engine, 5, 3, true)
 println("check=",res)
 
 println("Finished!")
