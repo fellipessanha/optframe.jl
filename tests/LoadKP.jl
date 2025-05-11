@@ -97,6 +97,7 @@ println("created component OptFrame:NS:FNS ", idx_ns)
 
 component_list_index = create_component_list(problem.engine, "[OptFrame:NS 0]", "OptFrame:NS[]")
 
+println(component_list_index)
 
 # list_idx = pKP.engine.create_component_list(
 #     "[ OptFrame:NS 0 ]", "OptFrame:NS[]")
@@ -106,10 +107,21 @@ component_list_index = create_component_list(problem.engine, "[OptFrame:NS 0]", 
 # optframe_api1d_create_component_list(FakeEnginePtr _engine, char* clist,
 #                                     char* list_type) {
 
+println()
+println("engine will list builders ")
+println(list_builders(problem.engine, "OptFrame:"))
+println()
+println("engine will list builders for :BasicSA ")
+println(list_builders(problem.engine, ":BasicSA"))
+println()
+
+
 
 println("try check")
 
-res = check(problem.engine, 5, 3, true)
+res = check(problem.engine, 5, 3, false)
 println("check=", res)
+
+
 
 println("Finished!")

@@ -4,6 +4,7 @@ using Libdl
 export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
 export add_constructive, add_evaluator, check
 export add_ns, create_component_list
+export list_builders
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid}, Any}()
@@ -166,6 +167,22 @@ function create_component_list(engine::Engine, string_list::String, list_type::S
 end
 
 # =====================================
+
+function optframe_api1d_engine_list_builders(engine::Ptr{Cvoid}, list_type::Cstring)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_engine_list_builders")
+	return  @ccall $creation_symbol(engine::Ptr{Cvoid}, list_type::Cstring)::Cint
+end
+
+function list_builders(engine::Engine, list_type::String)
+	factory = engine.hf
+	char_type = Cstring(pointer(list_type))
+	return optframe_api1d_engine_list_builders(
+		factory::Ptr{Cvoid},
+		char_type::Cstring,
+	)::Cint
+end
+
+# =========================================
 
 function onfail(code::Cint)::Cint
     println("Error code=",code)
