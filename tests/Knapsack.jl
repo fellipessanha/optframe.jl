@@ -8,6 +8,10 @@ export tostring_callback_julia_kp, callback_sol_deepcopy_kp, free_solution_kp
 export evaluate_solution
 export ns_rand_bitflip, move_apply_bitflip, move_cba_bitflip, move_eq_bitflip
 export free_move_kp
+export nsseq_bitflip_iterator_init, nsseq_bitflip_iterator_first
+export nsseq_bitflip_iterator_is_done, nsseq_bitflip_iterator_current
+export nsseq_bitflip_iterator_next
+
 
 using Random: shuffle
 
