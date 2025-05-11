@@ -54,7 +54,11 @@ f_del_ptr = @cfunction(free_solution_kp, Cint, (Ptr{Cvoid},))
 
 idx_c = add_constructive(problem.engine, f_is_ptr, Ptr{Nothing}(problem_ptr), f_cp_ptr, f_str_ptr, f_del_ptr)
 println("created component OptFrame:Constructive ", idx_c)
-println("created component OptFrame:InitialSearch ", idx_c)
+
+
+println("loading initial search")
+initial_search_index = create_initial_search(problem.engine, idx_ev, idx_c)
+println("created component OptFrame:InitialSearch ", initial_search_index)
 
 
 println("testing add_ns")
@@ -93,9 +97,6 @@ idx_ns = add_ns(problem.engine, f_nsrand_ptr, f_moveapply_ptr, f_moveeq_ptr,
     f_movecba_ptr, Ptr{Nothing}(problem_ptr), decref_callback_ptr)
 println("created component OptFrame:NS:FNS ", idx_ns)
 
-println("loading initial search")
-initial_search_index = create_initial_search(problem.engine, idx_ev, idx_c)
-println("created initial search with index ", initial_search_index)
 
 component_list_index = create_component_list(problem.engine, "[OptFrame:NS 0]", "OptFrame:NS[]")
 
@@ -106,11 +107,22 @@ list_engine_components(problem.engine)
 
 println()
 println("engine will list builders ")
-println(list_builders(problem.engine, "OptFrame:"))
+# println(list_builders(problem.engine, "OptFrame:"))
+println("    skipping...")
 println()
 println("engine will list builders for :BasicSA ")
 println(list_builders(problem.engine, ":BasicSA"))
 println()
+
+
+print("")
+print("testing builder (build_global_search) for SA...")
+print("")
+
+gs_idx = build_global_search(problem.engine,
+    "OptFrame:ComponentBuilder:GlobalSearch:SA:BasicSA",
+    "OptFrame:GeneralEvaluator:Evaluator 0 OptFrame:InitialSearch 0  OptFrame:NS[] 0 0.99 100 999")
+println("sos_idx=", gs_idx)
 
 println("try check")
 res = check(problem.engine, 5, 3, false)
