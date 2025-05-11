@@ -12,8 +12,6 @@ profits = [6.0, 3.5, 5.5, 4.0, 4.5]
 capacity = 26.0
 n = length(weights)
 
-println(n)
-
 problem = knapsack_problem_init(weights, profits, n, capacity)
 
 println("Finished!")
@@ -94,6 +92,10 @@ decref_callback_ptr = @cfunction(free_solution_kp, Cint, (Ptr{Cvoid},))
 idx_ns = add_ns(problem.engine, f_nsrand_ptr, f_moveapply_ptr, f_moveeq_ptr,
     f_movecba_ptr, Ptr{Nothing}(problem_ptr), decref_callback_ptr)
 println("created component OptFrame:NS:FNS ", idx_ns)
+
+println("loading initial search")
+initial_search_index = create_initial_search(problem.engine, idx_ev, idx_c)
+println("created initial search with index ", initial_search_index)
 
 component_list_index = create_component_list(problem.engine, "[OptFrame:NS 0]", "OptFrame:NS[]")
 

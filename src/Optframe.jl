@@ -4,7 +4,7 @@ using Libdl
 export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
 export add_constructive, add_evaluator, check
 export add_ns, create_component_list, list_engine_components
-export list_builders
+export list_builders, create_initial_search
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid},Any}()
@@ -194,6 +194,15 @@ function list_builders(engine::Engine, list_type::String)
         factory::Ptr{Cvoid},
         char_type::Cstring,
     )::Cint
+end
+
+function optframe_api1d_create_initial_search(engine::Ptr{Nothing}, evaluator_index::Cint, constructor_index::Cint)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_create_initial_search")
+    return @ccall $creation_symbol(engine::Ptr{Cvoid}, evaluator_index::Cint, constructor_index::Cint)::Cint
+end
+
+function create_initial_search(engine::Engine, evaluator_index::Int32, constructor_index::Int32)::Int32
+    return optframe_api1d_create_initial_search(engine.hf, evaluator_index, constructor_index)
 end
 
 # =========================================
