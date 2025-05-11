@@ -43,9 +43,6 @@ function init_engine(ll_int::Int32)::Engine
     return e
 end
 
-# ==================================
-
-
 function arena_count(e::Engine)
     return length(e.gc_arena)
 end
@@ -87,9 +84,6 @@ function global_unregister(ptr::Ptr{T}) where {T}
     # return nothing
     return false
 end
-
-
-# =================================
 
 function optframe_api1d_add_constructive(e_ptr::Ptr{Cvoid}, constructive_callback_ptr, problemCtx::Ptr, deepcopy_callback_ptr, to_string_callback_ptr, decref_callback_ptr)
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_constructive")
@@ -180,8 +174,6 @@ function create_component_list(engine::Engine, string_list::String, list_type::S
     )::Cint
 end
 
-# =====================================
-
 function optframe_api1d_engine_list_builders(engine::Ptr{Cvoid}, list_type::Cstring)
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_engine_list_builders")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, list_type::Cstring)::Cint
@@ -271,8 +263,6 @@ function check(e::Engine, p1::Int64, p2::Int64, verbose::Bool)::Bool
     return res
 end
 
-
-# =================================
 
 function welcome(e::Engine)
     optframe_api0d_engine_welcome(e.hf)
