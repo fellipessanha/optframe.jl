@@ -3,7 +3,7 @@ module OptFrame
 using Libdl
 export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
 export add_constructive, add_evaluator, check
-export add_ns
+export add_ns, create_component_list
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid}, Any}()
@@ -127,8 +127,7 @@ function add_evaluator(e::Engine, ev_callback_ptr::Ptr{Nothing}, min_or_max::Boo
     return idx_ev
 end
 
-function optframe_api1d_add_ns(e_ptr::Ptr{Cvoid}, 
-    fns_rand, fmove_apply, fmove_eq, fmove_cba, problemCtx::Ptr, decref_callback_ptr)
+function optframe_api1d_add_ns(e_ptr::Ptr{Cvoid}, fns_rand, fmove_apply, fmove_eq, fmove_cba, problemCtx::Ptr, decref_callback_ptr)
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_ns")
     return  @ccall $creation_symbol(
         e_ptr::Ptr{Cvoid}, 
@@ -148,6 +147,22 @@ function add_ns(e::Engine, fns_rand::Ptr{Nothing},
     idx_ns = optframe_api1d_add_ns(e.hf, 
     fns_rand, fmove_apply, fmove_eq, fmove_cba,  problemCtx, decref_callback_ptr)
     return idx_ns
+end
+
+function optframe_api1d_create_component_list(engine::Ptr{Cvoid}, char_list::Cstring, list_type::Cstring)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_create_component_list")
+	return  @ccall $creation_symbol(engine::Ptr{Cvoid}, char_list::Cstring, list_type::Cstring)::Cint
+end
+
+function create_component_list(engine::Engine, string_list::String, list_type::String)
+	factory = engine.hf
+	char_list = Cstring(pointer(string_list))
+	char_type = Cstring(pointer(list_type))
+	return optframe_api1d_create_component_list(
+		factory::Ptr{Cvoid},
+		char_list::Cstring,
+		char_type::Cstring,
+	)::Cint
 end
 
 # =====================================
