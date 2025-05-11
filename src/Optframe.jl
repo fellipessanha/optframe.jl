@@ -4,7 +4,7 @@ using Libdl
 export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
 export add_constructive, add_evaluator, check
 export add_ns, create_component_list, list_engine_components
-export list_builders, create_initial_search, build_global_search, run_global_search
+export list_builders, create_initial_search, build_global_search, run_global_search, add_nsseq
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid},Any}()
@@ -135,12 +135,19 @@ function optframe_api1d_add_ns(e_ptr::Ptr{Cvoid}, fns_rand, fmove_apply, fmove_e
     )::Cint
 end
 
-function add_ns(e::Engine, fns_rand::Ptr{Nothing},
-    fmove_apply::Ptr{Nothing}, fmove_eq::Ptr{Nothing}, fmove_cba::Ptr{Nothing},
-    problemCtx::Ptr{Nothing}, decref_callback_ptr::Ptr{Nothing})
+function add_ns(
+	e::Engine,
+	fns_rand::Ptr{Nothing},
+    fmove_apply::Ptr{Nothing},
+	fmove_eq::Ptr{Nothing},
+	fmove_cba::Ptr{Nothing},
+    problemCtx::Ptr{Nothing},
+	decref_callback_ptr::Ptr{Nothing}
+)
     # TODO: keep function pointers?
-    idx_ns = optframe_api1d_add_ns(e.hf,
-        fns_rand, fmove_apply, fmove_eq, fmove_cba, problemCtx, decref_callback_ptr)
+    idx_ns = optframe_api1d_add_ns(
+		e.hf, fns_rand, fmove_apply, fmove_eq, fmove_cba, problemCtx, decref_callback_ptr
+	)
     return idx_ns
 end
 
@@ -167,11 +174,7 @@ function create_component_list(engine::Engine, string_list::String, list_type::S
     factory = engine.hf
     char_list = Cstring(pointer(string_list))
     char_type = Cstring(pointer(list_type))
-    return optframe_api1d_create_component_list(
-        factory::Ptr{Cvoid},
-        char_list::Cstring,
-        char_type::Cstring,
-    )::Cint
+    return optframe_api1d_create_component_list( factory::Ptr{Cvoid}, char_list::Cstring, char_type::Cstring,)::Cint
 end
 
 function optframe_api1d_engine_list_builders(engine::Ptr{Cvoid}, list_type::Cstring)
@@ -196,7 +199,6 @@ end
 function create_initial_search(engine::Engine, evaluator_index::Int32, constructor_index::Int32)::Int32
     return optframe_api1d_create_initial_search(engine.hf, evaluator_index, constructor_index)
 end
-
 
 function optframe_api1d_build_global(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_global")
@@ -235,10 +237,58 @@ function run_global_search(engine::Engine, g_idx::Int32, timelimit::Float64)::Se
     )::SearchOutput
 end
 
+function optframe_api1d_add_nsseq(
+	engine::Ptr{Nothing},
+	iterator_random::Ptr{Nothing},
+	iterator_init::Ptr{Nothing},
+	iterator_first::Ptr{Nothing},
+	iterator_next::Ptr{Nothing},
+	iterator_isdone::Ptr{Nothing},
+	iterator_current::Ptr{Nothing},
+	move_apply::Ptr{Nothing},
+	move_equals::Ptr{Nothing},
+	move_can_be_applied::Ptr{Nothing},
+)
+	creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_nsseq")
+	return @ccall $creation_symbol(
+		engine::Ptr{Cvoid},
+		iterator_random::Ptr{Cvoid},
+		iterator_init::Ptr{Cvoid},
+		iterator_first::Ptr{Cvoid},
+		iterator_next::Ptr{Cvoid},
+		iterator_isdone::Ptr{Cvoid},
+		iterator_current::Ptr{Cvoid},
+		move_apply::Ptr{Cvoid},
+		move_equals::Ptr{Cvoid},
+		move_can_be_applied::Ptr{Cvoid},
+	)::Cint
+end
 
-
-# =========================================
-
+function add_nsseq(
+	engine::Engine,
+	iterator_random::Ptr{Nothing},
+	iterator_init::Ptr{Nothing},
+	iterator_first::Ptr{Nothing},
+	iterator_next::Ptr{Nothing},
+	iterator_isdone::Ptr{Nothing},
+	iterator_current::Ptr{Nothing},
+	move_apply::Ptr{Nothing},
+	move_equals::Ptr{Nothing},
+	move_can_be_applied::Ptr{Nothing},
+)::Int
+	return optframe_api1d_add_nsseq(
+		engine.hf,
+		iterator_random,
+		iterator_init,
+		iterator_first,
+		iterator_next,
+		iterator_isdone,
+		iterator_current,
+		move_apply,
+		move_equals,
+		move_can_be_applied,
+	)
+end
 function onfail(code::Cint)::Cint
     println("Error code=", code)
     return false
