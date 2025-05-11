@@ -124,6 +124,11 @@ gs_idx = build_global_search(problem.engine,
     "OptFrame:GeneralEvaluator:Evaluator 0 OptFrame:InitialSearch 0  OptFrame:NS[] 0 0.99 100 999")
 println("sos_idx=", gs_idx)
 
+
+lout = run_global_search(problem.engine, gs_idx, 4.0)
+println("lout=", lout)
+
+
 println("try check")
 res = check(problem.engine, 5, 3, false)
 println("check=", res)
