@@ -6,6 +6,7 @@ export add_constructive, add_evaluator, check
 export add_ns, add_nsseq
 export create_component_list, list_engine_components, list_builders, build_component
 export create_initial_search, build_global_search, build_local_search, run_global_search, build_single_obj_search, run_single_obj_search
+export experimental_set_parameter
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid},Any}()
@@ -233,8 +234,6 @@ function build_single_obj_search(engine::Engine, builder::String, build_string::
     )::Cint
 end
 
-
-
 function optframe_api1d_build_local_search(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_local_search")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)::Cint
@@ -364,6 +363,24 @@ function add_nsseq(
         decref_callback_ptr
 	)
 end
+
+
+function optframe_api1d_engine_experimental_set_parameter(engine::Ptr{Cvoid}, parameter::Cstring, svalue::Cstring)::Cint
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_engine_experimental_set_parameter")
+    return @ccall $creation_symbol(engine::Ptr{Cvoid}, parameter::Cstring, svalue::Cstring)::Cint
+end
+
+function experimental_set_parameter(engine::Engine, parameter::String, svalue::String)::Bool
+    factory = engine.hf
+    cstr_parameter = Cstring(pointer(parameter))
+    cstr_svalue = Cstring(pointer(svalue))
+    return Bool(optframe_api1d_engine_experimental_set_parameter(
+        factory::Ptr{Cvoid},
+        cstr_parameter::Cstring,
+        cstr_svalue::Cstring
+    )::Cint)
+end
+
 function onfail(code::Cint)::Cint
     println("Error code=", code)
     return false

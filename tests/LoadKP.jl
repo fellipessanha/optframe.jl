@@ -124,6 +124,10 @@ println("loading initial search")
 initial_search_index = create_initial_search(problem.engine, idx_ev, idx_c)
 println("created initial search with index ", initial_search_index)
 
+println("setting engine to silent! TODO: C++ library must support -1 for silent...")
+b=experimental_set_parameter(problem.engine, "ENGINE_LOG_LEVEL", "-1")
+println("b=",b)
+
 component_list_index = create_component_list(problem.engine, "[OptFrame:NS 0]", "OptFrame:NS[]")
 
 println(component_list_index)
@@ -191,7 +195,12 @@ lout = run_single_obj_search(problem.engine, sos_idx, 4.5)
 println("lout=", lout)
 
 println("try check")
-#res = check(problem.engine, 5, 3, false)
-#println("check=", res)
+
+# trying to silence components...
+b2=experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "-1")
+println("b2=",b2)
+
+res = check(problem.engine, 5, 3, false)
+println("check=", res)
 
 println("Finished!")
