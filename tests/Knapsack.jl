@@ -200,7 +200,7 @@ function nsseq_bitflip_iterator_init(problem::KnapsackProblem, solution::Knapsac
 end
 
 function nsseq_bitflip_iterator_first(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
-    iterator.k = 0
+    iterator.k = 1
 end
 
 function nsseq_bitflip_iterator_next(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
@@ -208,7 +208,7 @@ function nsseq_bitflip_iterator_next(problem::KnapsackProblem, iterator::MoveBit
 end
 
 function nsseq_bitflip_iterator_is_done(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
-    iterator.k >= problem.nitems
+    iterator.k > problem.nitems
 end
 
 function nsseq_bitflip_iterator_current(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
