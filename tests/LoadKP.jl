@@ -170,6 +170,13 @@ ls_idx = build_local_search(problem.engine,
     "OptFrame:GeneralEvaluator:Evaluator 0  OptFrame:NS:NSFind:NSSeq 0")
 println("ls_idx=", ls_idx)
 
+pert_idx = build_component(problem.engine,
+    "OptFrame:ComponentBuilder:ILS:LevelPert:LPlus2",
+    "OptFrame:GeneralEvaluator:Evaluator 0  OptFrame:NS 0",
+    "OptFrame:ILS:LevelPert")
+println("pert_idx=", pert_idx)
+
+list_engine_components(problem.engine, "OptFrame:")
 
 println("try check")
 #res = check(problem.engine, 5, 3, false)

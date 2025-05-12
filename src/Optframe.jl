@@ -4,7 +4,7 @@ using Libdl
 export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
 export add_constructive, add_evaluator, check
 export add_ns, add_nsseq
-export create_component_list, list_engine_components, list_builders
+export create_component_list, list_engine_components, list_builders, build_component
 export create_initial_search, build_global_search, build_local_search, run_global_search
 
 # global arena, instead of local Engine one
@@ -230,6 +230,24 @@ function build_local_search(engine::Engine, builder::String, build_string::Strin
         factory::Ptr{Cvoid},
         cstr_builder::Cstring,
         cstr_build_string::Cstring
+    )::Cint
+end
+
+function optframe_api1d_build_component(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring, component_type::Cstring)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_component")
+    return @ccall $creation_symbol(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring, component_type::Cstring)::Cint
+end
+
+function build_component(engine::Engine, builder::String, build_string::String, component_type::String)
+    factory = engine.hf
+    cstr_builder = Cstring(pointer(builder))
+    cstr_build_string = Cstring(pointer(build_string))
+    cstr_component_type = Cstring(pointer(component_type))
+    return optframe_api1d_build_component(
+        factory::Ptr{Cvoid},
+        cstr_builder::Cstring,
+        cstr_build_string::Cstring,
+        cstr_component_type::Cstring
     )::Cint
 end
 
