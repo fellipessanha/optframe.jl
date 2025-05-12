@@ -96,11 +96,11 @@ println("created component OptFrame:NS:FNS ", idx_ns)
 
 println("creating nsseq(neighbor search sequence)")
 
-iterator_init_ptr = @cfunction(nsseq_bitflip_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_first_ptr = @cfunction(nsseq_bitflip_iterator_first, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_next_ptr = @cfunction(nsseq_bitflip_iterator_next, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_is_done_ptr = @cfunction(nsseq_bitflip_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_current_ptr = @cfunction(nsseq_bitflip_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_init_ptr = @cfunction(nsseq_bitflip_iterator_init_c, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_first_ptr = @cfunction(nsseq_bitflip_iterator_first_c, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_next_ptr = @cfunction(nsseq_bitflip_iterator_next_c, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_is_done_ptr = @cfunction(nsseq_bitflip_iterator_is_done_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_current_ptr = @cfunction(nsseq_bitflip_iterator_current_c, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
 
 nsseq_idx = add_nsseq(
     problem.engine,
@@ -113,6 +113,8 @@ nsseq_idx = add_nsseq(
     f_moveapply_ptr,
     f_moveeq_ptr,
     f_movecba_ptr,
+    Ptr{Nothing}(problem_ptr), 
+    decref_callback_ptr
 )
 
 println("added nsseq with idx = ", nsseq_idx)
@@ -151,9 +153,18 @@ println("sos_idx=", gs_idx)
 lout = run_global_search(problem.engine, gs_idx, 4.0)
 println("lout=", lout)
 
+println("testing iterator for nsseq")
+it = nsseq_bitflip_iterator_init(problem, sol)
+nsseq_bitflip_iterator_first(problem, it)
+while !Bool(nsseq_bitflip_iterator_is_done(problem, it))
+    mvv = nsseq_bitflip_iterator_current(problem, it)
+    println("move mvv = ", mvv)
+    nsseq_bitflip_iterator_next(problem, it)
+end
+println("finished nsseq")
 
 println("try check")
-res = check(problem.engine, 5, 3, false)
+res = check(problem.engine, 5, 3, true)
 println("check=", res)
 
 println("Finished!")

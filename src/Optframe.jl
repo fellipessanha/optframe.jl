@@ -248,6 +248,8 @@ function optframe_api1d_add_nsseq(
 	move_apply::Ptr{Nothing},
 	move_equals::Ptr{Nothing},
 	move_can_be_applied::Ptr{Nothing},
+    problemCtx::Ptr,
+    decref_callback_ptr
 )
 	creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_nsseq")
 	return @ccall $creation_symbol(
@@ -261,6 +263,8 @@ function optframe_api1d_add_nsseq(
 		move_apply::Ptr{Cvoid},
 		move_equals::Ptr{Cvoid},
 		move_can_be_applied::Ptr{Cvoid},
+        problemCtx::Ptr{Cvoid},
+        decref_callback_ptr::Ptr{Cvoid}
 	)::Cint
 end
 
@@ -275,6 +279,8 @@ function add_nsseq(
 	move_apply::Ptr{Nothing},
 	move_equals::Ptr{Nothing},
 	move_can_be_applied::Ptr{Nothing},
+    problemCtx::Ptr{Nothing},
+    decref_callback_ptr::Ptr{Nothing}
 )::Int
 	return optframe_api1d_add_nsseq(
 		engine.hf,
@@ -287,6 +293,8 @@ function add_nsseq(
 		move_apply,
 		move_equals,
 		move_can_be_applied,
+        problemCtx,
+        decref_callback_ptr
 	)
 end
 function onfail(code::Cint)::Cint
