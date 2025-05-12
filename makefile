@@ -12,3 +12,6 @@ test: build/optframe_lib.so
 	cd tests && julia LoadOptFrame.jl
 	echo "Test 2"
 	cd tests && julia LoadKP.jl
+
+clean:
+	rm -f build/optframe_lib.so

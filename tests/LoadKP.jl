@@ -124,8 +124,8 @@ println("loading initial search")
 initial_search_index = create_initial_search(problem.engine, idx_ev, idx_c)
 println("created initial search with index ", initial_search_index)
 
-println("setting engine to silent! TODO: C++ library must support -1 for silent...")
-b=experimental_set_parameter(problem.engine, "ENGINE_LOG_LEVEL", "-1")
+# Verbosity filter 4 is disabled. Filter -1 is debug.
+b=experimental_set_parameter(problem.engine, "ENGINE_LOG_LEVEL", "4")
 println("b=",b)
 
 component_list_index = create_component_list(problem.engine, "[OptFrame:NS 0]", "OptFrame:NS[]")
@@ -182,6 +182,10 @@ println("pert_idx=", pert_idx)
 
 list_engine_components(problem.engine, "OptFrame:")
 
+# Verbosity filter 4 is disabled. Filter -1 is debug.
+b2=experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "4")
+println("b2=",b2)
+
 sos_idx = build_single_obj_search(problem.engine,
     "OptFrame:ComponentBuilder:SingleObjSearch:ILS:ILSLevels",
     "OptFrame:GeneralEvaluator:Evaluator 0 OptFrame:InitialSearch 0  OptFrame:LocalSearch 0 OptFrame:ILS:LevelPert 0  50  3")
@@ -189,17 +193,11 @@ println("sos_idx=", sos_idx)
 
 println("")
 println("testing execution of SingleObjSearch (run_sos_search) for ILS...")
-println("")
 
 lout = run_single_obj_search(problem.engine, sos_idx, 4.5)
-println("lout=", lout)
+println("ILS output: ", lout)
 
-println("try check")
-
-# trying to silence components...
-b2=experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "-1")
-println("b2=",b2)
-
+println("try check (with disabled prints)")
 res = check(problem.engine, 5, 3, false)
 println("check=", res)
 
