@@ -99,7 +99,7 @@ println("creating nsseq(neighbor search sequence)")
 iterator_init_ptr = @cfunction(nsseq_bitflip_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
 iterator_first_ptr = @cfunction(nsseq_bitflip_iterator_first, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
 iterator_next_ptr = @cfunction(nsseq_bitflip_iterator_next, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_is_done_ptr = @cfunction(nsseq_bitflip_iterator_is_done, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_is_done_ptr = @cfunction(nsseq_bitflip_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
 iterator_current_ptr = @cfunction(nsseq_bitflip_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
 
 nsseq_idx = add_nsseq(

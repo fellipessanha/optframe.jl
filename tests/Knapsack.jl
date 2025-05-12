@@ -196,19 +196,19 @@ function move_eq_bitflip(p_void::Ptr{Nothing}, m1_void::Ptr{Nothing}, m2_void::P
 end
 
 function nsseq_bitflip_iterator_init(problem::KnapsackProblem, solution::KnapsackSolution)::MoveBitFlip
-    return MoveBitFlip(1)
+    return MoveBitFlip(Int32(1))
 end
 
-function nsseq_bitflip_iterator_first(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
-    iterator.k = 1
+function nsseq_bitflip_iterator_first(problem::KnapsackProblem, iterator::MoveBitFlip)
+    iterator.k = Int32(1)
 end
 
-function nsseq_bitflip_iterator_next(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
-    iterator.k += 1
+function nsseq_bitflip_iterator_next(problem::KnapsackProblem, iterator::MoveBitFlip)
+    iterator.k += Int32(1)
 end
 
-function nsseq_bitflip_iterator_is_done(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
-    iterator.k > problem.nitems
+function nsseq_bitflip_iterator_is_done(problem::KnapsackProblem, iterator::MoveBitFlip)::Int32
+    Int32(iterator.k > problem.nitems)
 end
 
 function nsseq_bitflip_iterator_current(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
