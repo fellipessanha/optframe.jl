@@ -2,7 +2,7 @@ module Knapsack
 
 import ..OptFrame
 
-export KnapsackProblem, knapsack_problem_init
+export KnapsackProblem, knapsack_problem_init, KnapsackSolution
 export random_initial_solution, callback_sol_deepcopy_kp
 export tostring_callback_julia_kp, callback_sol_deepcopy_kp, free_solution_kp
 export evaluate_solution
@@ -43,8 +43,11 @@ function evaluate_solution(problem::KnapsackProblem, solution::KnapsackSolution)
     for i in 1:problem.nitems
         if solution.selected[i]
             total_weight += problem.vweights[i]
-            profit += problem.vweights[i]
+            profit += problem.vprofits[i]
         end
+    end
+    if total_weight > problem.capacity
+        profit += 1000.0*(problem.capacity-total_weight)
     end
     return profit
 end

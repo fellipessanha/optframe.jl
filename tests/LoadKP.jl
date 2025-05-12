@@ -196,6 +196,10 @@ println("testing execution of SingleObjSearch (run_sos_search) for ILS...")
 
 lout = run_single_obj_search(problem.engine, sos_idx, 4.5)
 println("ILS output: ", lout)
+lout_sol_ptr = convert(Ptr{KnapsackSolution}, lout.best_s)
+lout_sol = unsafe_load(lout_sol_ptr)
+println(lout_sol)
+println(problem)
 
 println("try check (with disabled prints)")
 res = check(problem.engine, 5, 3, false)
