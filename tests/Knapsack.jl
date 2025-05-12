@@ -230,6 +230,7 @@ function nsseq_bitflip_iterator_first_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothi
     it = convert(Ptr{MoveBitFlip}, it_void)
     iterator = unsafe_load(it)
     nsseq_bitflip_iterator_first(problem, iterator)
+    unsafe_store!(it, iterator)
     println("end nsseq_bitflip_iterator_first_c() iterator=", iterator)
     println("end nsseq_bitflip_iterator_first_c() it_void=", it_void)
 end
@@ -248,6 +249,7 @@ function nsseq_bitflip_iterator_next_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothin
     iterator = unsafe_load(it)
     println("iterator before next it=", iterator)
     nsseq_bitflip_iterator_next(problem, iterator)
+    unsafe_store!(it, iterator)
     println("iterator after next it=", iterator)
 end
 
