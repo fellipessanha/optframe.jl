@@ -163,8 +163,16 @@ while !Bool(nsseq_bitflip_iterator_is_done(problem, it))
 end
 println("finished nsseq")
 
+
+
+ls_idx = build_local_search(problem.engine,
+    "OptFrame:ComponentBuilder:LocalSearch:FI",
+    "OptFrame:GeneralEvaluator:Evaluator 0  OptFrame:NS:NSFind:NSSeq 0")
+println("ls_idx=", ls_idx)
+
+
 println("try check")
-res = check(problem.engine, 5, 3, false)
-println("check=", res)
+#res = check(problem.engine, 5, 3, false)
+#println("check=", res)
 
 println("Finished!")

@@ -3,8 +3,9 @@ module OptFrame
 using Libdl
 export Engine, init_engine, welcome, arena_count, register, unregister, global_arena_count, global_register, global_unregister
 export add_constructive, add_evaluator, check
-export add_ns, create_component_list, list_engine_components
-export list_builders, create_initial_search, build_global_search, run_global_search, add_nsseq
+export add_ns, add_nsseq
+export create_component_list, list_engine_components, list_builders
+export create_initial_search, build_global_search, build_local_search, run_global_search
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid},Any}()
@@ -210,6 +211,22 @@ function build_global_search(engine::Engine, builder::String, build_string::Stri
     cstr_builder = Cstring(pointer(builder))
     cstr_build_string = Cstring(pointer(build_string))
     return optframe_api1d_build_global(
+        factory::Ptr{Cvoid},
+        cstr_builder::Cstring,
+        cstr_build_string::Cstring
+    )::Cint
+end
+
+function optframe_api1d_build_local_search(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_local_search")
+    return @ccall $creation_symbol(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)::Cint
+end
+
+function build_local_search(engine::Engine, builder::String, build_string::String)
+    factory = engine.hf
+    cstr_builder = Cstring(pointer(builder))
+    cstr_build_string = Cstring(pointer(build_string))
+    return optframe_api1d_build_local_search(
         factory::Ptr{Cvoid},
         cstr_builder::Cstring,
         cstr_build_string::Cstring
