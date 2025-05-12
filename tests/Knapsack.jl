@@ -201,7 +201,6 @@ function move_eq_bitflip(p_void::Ptr{Nothing}, m1_void::Ptr{Nothing}, m2_void::P
 end
 
 function nsseq_bitflip_iterator_init(problem::KnapsackProblem, solution::KnapsackSolution)::MoveBitFlip
-    println("begin nsseq_bitflip_iterator_init()")
     return MoveBitFlip(Int32(-1))
 end
 
@@ -212,61 +211,48 @@ function nsseq_bitflip_iterator_init_c(p_void::Ptr{Nothing}, s_void::Ptr{Nothing
     solution = unsafe_load(s)
     m = nsseq_bitflip_iterator_init(problem, solution)
     m_raw_ptr = OptFrame.global_register(m)
-    println("nsseq_bitflip_iterator_init_c -> init it=", m_raw_ptr)
     return Ptr{Nothing}(m_raw_ptr)
 end
 
 
 function nsseq_bitflip_iterator_first(problem::KnapsackProblem, iterator::MoveBitFlip)
-    println("begin nsseq_bitflip_iterator_first() iterator=", iterator)
     iterator.k = Int32(1)
-    println("end nsseq_bitflip_iterator_first() iterator=", iterator)
 end
 
 function nsseq_bitflip_iterator_first_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothing})::Cvoid
-    println("begin nsseq_bitflip_iterator_first_c() it_void=", it_void)
     p = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p)
     it = convert(Ptr{MoveBitFlip}, it_void)
     iterator = unsafe_load(it)
     nsseq_bitflip_iterator_first(problem, iterator)
     unsafe_store!(it, iterator)
-    println("end nsseq_bitflip_iterator_first_c() iterator=", iterator)
     println("end nsseq_bitflip_iterator_first_c() it_void=", it_void)
 end
 
 function nsseq_bitflip_iterator_next(problem::KnapsackProblem, iterator::MoveBitFlip)
-    println("begin nsseq_bitflip_iterator_next()")
     iterator.k += Int32(1)
-    println("end nsseq_bitflip_iterator_next()")
 end
 
 function nsseq_bitflip_iterator_next_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothing})::Cvoid
-    println("begin nsseq_bitflip_iterator_next_c() it_void=", it_void)
     p = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p)
     it = convert(Ptr{MoveBitFlip}, it_void)
     iterator = unsafe_load(it)
-    println("iterator before next it=", iterator)
     nsseq_bitflip_iterator_next(problem, iterator)
     unsafe_store!(it, iterator)
     println("iterator after next it=", iterator)
 end
 
 function nsseq_bitflip_iterator_is_done(problem::KnapsackProblem, iterator::MoveBitFlip)::Bool
-    println("begin nsseq_bitflip_iterator_is_done()")
-    println("iterator.k=", iterator.k, "> problem.nitems=", problem.nitems)
     return iterator.k > problem.nitems
 end
 
 function nsseq_bitflip_iterator_is_done_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothing})::Cint
-    println("begin nsseq_bitflip_iterator_is_done_c() it_void=",it_void)
     p = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p)
     it = convert(Ptr{MoveBitFlip}, it_void)
     iterator = unsafe_load(it)
     b = nsseq_bitflip_iterator_is_done(problem, iterator)
-    println("result nsseq_bitflip_iterator_is_done_c = ", b)
     if b
         return Int32(1)
     else
@@ -275,7 +261,6 @@ function nsseq_bitflip_iterator_is_done_c(p_void::Ptr{Nothing}, it_void::Ptr{Not
 end
 
 function nsseq_bitflip_iterator_current(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
-    println("begin nsseq_bitflip_iterator_current() it=", iterator)
     return deepcopy(iterator)
 end
 
