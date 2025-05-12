@@ -219,28 +219,32 @@ function nsseq_bitflip_iterator_first(problem::KnapsackProblem, iterator::MoveBi
     iterator.k = Int32(1)
 end
 
-function nsseq_bitflip_iterator_first_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothing})::Cvoid
+function nsseq_bitflip_iterator_first_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothing})::Cint
     p = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p)
+    x = Int32(0)
     it = convert(Ptr{MoveBitFlip}, it_void)
-    iterator = unsafe_load(it)
-    nsseq_bitflip_iterator_first(problem, iterator)
-    unsafe_store!(it, iterator)
-    println("end nsseq_bitflip_iterator_first_c() it_void=", it_void)
+    it2 = unsafe_pointer_to_objref(it)
+    it2.k = 1
+    #iterator = unsafe_load(it)   # COPY
+    #nsseq_bitflip_iterator_first(problem, iterator)
+    #unsafe_store!(it, iterator)
+    return x # workaround on GC to prevent collection... this is Cvoid!
 end
 
 function nsseq_bitflip_iterator_next(problem::KnapsackProblem, iterator::MoveBitFlip)
     iterator.k += Int32(1)
 end
 
-function nsseq_bitflip_iterator_next_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothing})::Cvoid
+function nsseq_bitflip_iterator_next_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothing})::Cint
     p = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p)
     it = convert(Ptr{MoveBitFlip}, it_void)
     iterator = unsafe_load(it)
     nsseq_bitflip_iterator_next(problem, iterator)
     unsafe_store!(it, iterator)
-    println("iterator after next it=", iterator)
+    #println("iterator after next it=", iterator)
+    return iterator.k # workaround on GC to prevent collection... this is Cvoid!
 end
 
 function nsseq_bitflip_iterator_is_done(problem::KnapsackProblem, iterator::MoveBitFlip)::Bool

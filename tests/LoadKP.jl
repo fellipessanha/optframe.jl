@@ -97,8 +97,8 @@ println("created component OptFrame:NS:FNS ", idx_ns)
 println("creating nsseq(neighbor search sequence)")
 
 iterator_init_ptr = @cfunction(nsseq_bitflip_iterator_init_c, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_first_ptr = @cfunction(nsseq_bitflip_iterator_first_c, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_next_ptr = @cfunction(nsseq_bitflip_iterator_next_c, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_first_ptr = @cfunction(nsseq_bitflip_iterator_first_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_next_ptr = @cfunction(nsseq_bitflip_iterator_next_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
 iterator_is_done_ptr = @cfunction(nsseq_bitflip_iterator_is_done_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
 iterator_current_ptr = @cfunction(nsseq_bitflip_iterator_current_c, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
 
@@ -164,7 +164,7 @@ end
 println("finished nsseq")
 
 println("try check")
-res = check(problem.engine, 5, 3, true)
+res = check(problem.engine, 5, 3, false)
 println("check=", res)
 
 println("Finished!")
