@@ -5,7 +5,7 @@ export Engine, init_engine, welcome, arena_count, register, unregister, global_a
 export add_constructive, add_evaluator, check
 export add_ns, add_nsseq
 export create_component_list, list_engine_components, list_builders, build_component
-export create_initial_search, build_global_search, build_local_search, run_global_search
+export create_initial_search, build_global_search, build_local_search, run_global_search, build_single_obj_search, run_single_obj_search
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid},Any}()
@@ -217,6 +217,24 @@ function build_global_search(engine::Engine, builder::String, build_string::Stri
     )::Cint
 end
 
+function optframe_api1d_build_single(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_single")
+    return @ccall $creation_symbol(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)::Cint
+end
+
+function build_single_obj_search(engine::Engine, builder::String, build_string::String)
+    factory = engine.hf
+    cstr_builder = Cstring(pointer(builder))
+    cstr_build_string = Cstring(pointer(build_string))
+    return optframe_api1d_build_single(
+        factory::Ptr{Cvoid},
+        cstr_builder::Cstring,
+        cstr_build_string::Cstring
+    )::Cint
+end
+
+
+
 function optframe_api1d_build_local_search(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_local_search")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)::Cint
@@ -266,6 +284,20 @@ end
 function run_global_search(engine::Engine, g_idx::Int32, timelimit::Float64)::SearchOutput
     factory = engine.hf
     return optframe_api1d_run_global_search(
+        factory::Ptr{Cvoid},
+        g_idx::Cint,
+        timelimit::Cdouble
+    )::SearchOutput
+end
+
+function optframe_api1d_run_sos_search(engine::Ptr{Cvoid}, g_idx::Cint, timelimit::Cdouble)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_run_sos_search")
+    return @ccall $creation_symbol(engine::Ptr{Cvoid}, g_idx::Cint, timelimit::Cdouble)::SearchOutput
+end
+
+function run_single_obj_search(engine::Engine, g_idx::Int32, timelimit::Float64)::SearchOutput
+    factory = engine.hf
+    return optframe_api1d_run_sos_search(
         factory::Ptr{Cvoid},
         g_idx::Cint,
         timelimit::Cdouble

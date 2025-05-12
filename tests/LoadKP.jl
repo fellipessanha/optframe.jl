@@ -178,6 +178,18 @@ println("pert_idx=", pert_idx)
 
 list_engine_components(problem.engine, "OptFrame:")
 
+sos_idx = build_single_obj_search(problem.engine,
+    "OptFrame:ComponentBuilder:SingleObjSearch:ILS:ILSLevels",
+    "OptFrame:GeneralEvaluator:Evaluator 0 OptFrame:InitialSearch 0  OptFrame:LocalSearch 0 OptFrame:ILS:LevelPert 0  50  3")
+println("sos_idx=", sos_idx)
+
+println("")
+println("testing execution of SingleObjSearch (run_sos_search) for ILS...")
+println("")
+
+lout = run_single_obj_search(problem.engine, sos_idx, 4.5)
+println("lout=", lout)
+
 println("try check")
 #res = check(problem.engine, 5, 3, false)
 #println("check=", res)
