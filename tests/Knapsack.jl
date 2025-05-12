@@ -8,19 +8,23 @@ export tostring_callback_julia_kp, callback_sol_deepcopy_kp, free_solution_kp
 export evaluate_solution
 export ns_rand_bitflip, move_apply_bitflip, move_cba_bitflip, move_eq_bitflip
 export free_move_kp
+export nsseq_bitflip_iterator_init, nsseq_bitflip_iterator_first
+export nsseq_bitflip_iterator_is_done, nsseq_bitflip_iterator_current
+export nsseq_bitflip_iterator_next
+
 
 using Random: shuffle
 
 mutable struct KnapsackProblem
-    vweights::Vector{Float64} 
-    vprofits::Vector{Float64} 
-    nitems::Cint            
+    vweights::Vector{Float64}
+    vprofits::Vector{Float64}
+    nitems::Cint
     capacity::Float64
     engine::OptFrame.Engine
 end
 
-function knapsack_problem_init(vweights::Vector{Float64},vprofits::Vector{Float64},nitems::Int64,capacity::Float64,ll::Int64=0)
-    prob = KnapsackProblem(vweights,vprofits,Cint(nitems),capacity, OptFrame.init_engine(ll))
+function knapsack_problem_init(vweights::Vector{Float64}, vprofits::Vector{Float64}, nitems::Int64, capacity::Float64, ll::Int64=0)
+    prob = KnapsackProblem(vweights, vprofits, Cint(nitems), capacity, OptFrame.init_engine(ll))
     return prob
 end
 
@@ -191,6 +195,24 @@ function move_eq_bitflip(p_void::Ptr{Nothing}, m1_void::Ptr{Nothing}, m2_void::P
     return Int32(move_eq_bitflip(problem, m1, m2))
 end
 
-# =======================
+function nsseq_bitflip_iterator_init(problem::KnapsackProblem, solution::KnapsackSolution)::MoveBitFlip
+    return MoveBitFlip(1)
+end
+
+function nsseq_bitflip_iterator_first(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
+    iterator.k = 1
+end
+
+function nsseq_bitflip_iterator_next(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
+    iterator.k += 1
+end
+
+function nsseq_bitflip_iterator_is_done(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
+    iterator.k > problem.nitems
+end
+
+function nsseq_bitflip_iterator_current(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
+    return deepcopy(iterator)
+end
 
 end # module Knapsack

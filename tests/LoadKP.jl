@@ -4,9 +4,6 @@ using .OptFrame
 include("./Knapsack.jl")
 using .Knapsack
 
-
-# ==================
-
 weights = [12.0, 7.0, 11.0, 8.0, 9.0]
 profits = [6.0, 3.5, 5.5, 4.0, 4.5]
 capacity = 26.0
@@ -97,6 +94,33 @@ idx_ns = add_ns(problem.engine, f_nsrand_ptr, f_moveapply_ptr, f_moveeq_ptr,
     f_movecba_ptr, Ptr{Nothing}(problem_ptr), decref_callback_ptr)
 println("created component OptFrame:NS:FNS ", idx_ns)
 
+println("creating nsseq(neighbor search sequence)")
+
+iterator_init_ptr = @cfunction(nsseq_bitflip_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_first_ptr = @cfunction(nsseq_bitflip_iterator_first, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_next_ptr = @cfunction(nsseq_bitflip_iterator_next, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_is_done_ptr = @cfunction(nsseq_bitflip_iterator_is_done, Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_current_ptr = @cfunction(nsseq_bitflip_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
+
+nsseq_idx = add_nsseq(
+    problem.engine,
+    f_nsrand_ptr,
+    iterator_init_ptr,
+    iterator_first_ptr,
+    iterator_next_ptr,
+    iterator_is_done_ptr,
+    iterator_current_ptr,
+    f_moveapply_ptr,
+    f_moveeq_ptr,
+    f_movecba_ptr,
+)
+
+println("added nsseq with idx = ", nsseq_idx)
+
+
+println("loading initial search")
+initial_search_index = create_initial_search(problem.engine, idx_ev, idx_c)
+println("created initial search with index ", initial_search_index)
 
 component_list_index = create_component_list(problem.engine, "[OptFrame:NS 0]", "OptFrame:NS[]")
 
@@ -107,7 +131,6 @@ list_engine_components(problem.engine)
 
 println()
 println("engine will list builders ")
-# println(list_builders(problem.engine, "OptFrame:"))
 println("    skipping...")
 println()
 println("engine will list builders for :BasicSA ")
