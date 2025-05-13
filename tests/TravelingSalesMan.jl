@@ -162,7 +162,7 @@ function apply_move_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, soluti
     move = load_void_into_obj(move_void, MoveSwap)
     solution = load_void_into_obj(solution_void, TSPSolution)
     move_applied = apply_move_swap(problem, move, solution)
-    applied_pointer = OptFrame.globa_register(move_applied)
+    applied_pointer = OptFrame.global_register(move_applied)
     return Ptr{Cvoid}(applied_pointer)
 end
 
