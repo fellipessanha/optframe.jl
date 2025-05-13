@@ -1,0 +1,10 @@
+name    = "OptFrame"
+uuid    = "872f0478-f731-4413-b44f-091e1a536aab"
+authors = ["igormcoelho", "fellipessanha", "Pedro Maciel Xavier <mail@pedro.ϵλ>"]
+version = "0.1.0"
+
+[deps]
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+
+[compat]
+Libdl = "1.11.0"
