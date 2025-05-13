@@ -64,7 +64,6 @@ random_move_pointer = @cfunction(generate_random_move_swap, Ptr{Cvoid}, (Ptr{Cvo
 apply_move_pointer = @cfunction(apply_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},))
 equals_move_pointer = @cfunction(move_is_equal_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},))
 can_be_applied_move_pointer = @cfunction(move_can_be_applied_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},))
-decref_callback_ptr = @cfunction(free_tsp_solution_pointer, Cint, (Ptr{Cvoid},))
 
 idx_ns = add_ns(
     problem.engine,
@@ -73,7 +72,7 @@ idx_ns = add_ns(
     equals_move_pointer,
     can_be_applied_move_pointer,
     problem_void,
-    decref_callback_ptr
+    free_tsp_solution_pointer
 )
 println("created component OptFrame:NS:FNS ", idx_ns)
 
