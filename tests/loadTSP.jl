@@ -5,7 +5,7 @@ using .OptFrame
 include("./TravelingSalesMan.jl")
 using .TravelingSalesMan
 
-cities = [i for i in 1:20]
+cities = [i for i in 1:100]
 x_coordinates = [10 * i for i in 1:length(cities)]
 y_coordinates = [Int64(round(10 * cos(deg2rad(10 * i)))) for i in 1:length(cities)]
 
@@ -15,7 +15,7 @@ problem = initialize_tsp_problem(cities, x_coordinates, y_coordinates)
 b2 = experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "-1")
 println("b2=", b2)
 
-println(problem)
+#println(problem)
 
 problem_ptr = Ptr{TSPProblem}(pointer_from_objref(problem))
 problem_void = Ptr{Cvoid}(problem_ptr)
@@ -99,6 +99,6 @@ nsseq_idx = add_nsseq(
 println("added nsseq with idx = ", nsseq_idx)
 
 println("try check (with disabled prints)")
-res = check(problem.engine, 2, 2, true)
+res = check(problem.engine, 300, 5, false)
 println("check=", res)
 
