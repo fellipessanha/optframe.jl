@@ -9,6 +9,10 @@ export initialize_tsp_problem, generate_random_initial_solution
 export evaluate_solution, callback_deep_copy
 export callback_tostring_tsp, free_tsp_solution
 export generate_random_move_swap, apply_move_swap
+export move_can_be_applied_swap, move_is_equal_swap
+export nsseq_swap_iterator_init, nsseq_swap_iterator_first
+export nsseq_swap_iterator_next, nsseq_swap_iterator_current
+export nsseq_swap_iterator_is_done
 
 mutable struct TSPProblem
     engine::OptFrame.Engine
@@ -26,6 +30,11 @@ end
 mutable struct MoveSwap
     index_i::Cint
     index_j::Cint
+end
+
+function load_void_into_obj(pointer::Ptr{Cvoid}, type::Type)
+    object = convert(Ptr{type}, pointer)
+    return unsafe_load(object)
 end
 
 function euclidean_distance(x1::Cint, y1::Cint, x2::Cint, y2::Cint)::Cfloat
@@ -135,6 +144,115 @@ function apply_move_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution)::
     solution.cities_path[move.index_i], solution.cities_path[move.index_j] =
         solution.cities_path[move.index_j], solution.cities_path[move.index_i]
     return deepcopy(move)
+end
+
+function apply_move_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Nothing})::Ptr{Cvoid}
+    problem = load_void_into_obj(problem_void, TSPProblem)
+    move = load_void_into_obj(move_void, MoveSwap)
+    solution = load_void_into_obj(solution_void, TSPSolution)
+    move_applied = apply_move_swap(problem, move, solution)
+    applied_pointer = OptFrame.globa_register(move_applied)
+    return Ptr{Cvoid}(applied_pointer)
+end
+
+function move_is_equal_swap(_::TSPProblem, move_a::MoveSwap, move_b::MoveSwap)::Bool
+    move_a_idxs = (move_a.index_i, move_a.index_j)
+    return move_b.index_i in move_a_idxs && move_b.index_j in move_a_idxs
+end
+
+
+function move_is_equal_swap(problem_void::Ptr{Cvoid}, move_a_void::Ptr{Cvoid}, move_b_void::Ptr{Cvoid})::Cint
+    problem = load_void_into_obj(problem_void, TSPProblem)
+    move_a = load_void_into_obj(move_a_void, Ptr{MoveSwap})
+    move_b = load_void_into_obj(move_b_void, Ptr{MoveSwap})
+    return Int32(move_is_equal_swap(problem, move_a, move_b))
+end
+
+function move_can_be_applied_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution)::MoveSwap
+    return move.index_i != move.index_j &&
+           move.index_i <= solution.path_size &&
+           move.index_j <= solution.path_size
+end
+
+function move_can_be_applied_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid})::Ptr{Cvoid}
+    problem = load_void_into_obj(problem_void, Ptr{MoveSwap})
+    move = load_void_into_obj(move_void, Ptr{MoveSwap})
+    solution = load_void_into_obj(solution_void, TSPSolution)
+    move_applied = apply_move_swap(problem, move, solution)
+    applied_pointer = OptFrame.globa_register(move_applied)
+    return Ptr{Cvoid}(applied_pointer)
+end
+
+function nsseq_swap_iterator_init()::MoveSwap
+    return MoveSwap(Cint(-1), Cint(-1))
+end
+
+function nsseq_swap_iterator_init(_::TSPProblem, _::TSPSolution)::MoveSwap
+    return nsseq_swap_iterator_init()
+end
+
+function nsseq_swap_iterator_init(_::Ptr{Cvoid}, _::Ptr{Cvoid})::Ptr{Cvoid}
+    init_move = nsseq_swap_iterator_init()
+    init_move_pointer = OptFrame.global_register(init_move)
+    return Ptr{Nothing}(init_move_pointer)
+end
+
+function nsseq_swap_iterator_first(_::TSPProblem, iterator::MoveSwap)::Cvoid
+    iterator.index_i = 1
+    iterator.index_j = 2
+end
+
+function nsseq_swap_iterator_first(problem_void::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Cint
+    problem = load_void_into_obj(problem_void, TSPProblem)
+    iterator_ptr = convert(Ptr{MoveSwap}(iterator_void))
+    iterator::MoveSwap = unsafe_pointer_to_objref(iterator_ptr)
+    nsseq_swap_iterator_first(problem, iterator)
+    void_return = Int32(0)
+    return void_return
+end
+
+function nsseq_swap_iterator_next(problem::TSPProblem, iterator::MoveSwap)::Nothing
+    if iterator.index_j == problem.number_of_cities
+        iterator.index_i += 1
+        iterator.index_j = iterator.index_i + 1
+    else
+        iterator.index_j += 1
+    end
+end
+
+
+function nsseq_swap_iterator_next(_::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Cint
+    iterator_ptr = convert(Ptr{MoveSwap}(iterator_void))
+    iterator::MoveSwap = unsafe_pointer_to_objref(iterator_ptr)
+    iterator.index_i = 1
+    iterator.index_i = 2
+    void_return = Int32(0)
+    return void_return
+end
+
+
+function nsseq_swap_iterator_is_done(problem::TSPProblem, iterator::MoveSwap)::Bool
+    return iterator.index_i >= problem.number_of_cities
+end
+
+function nsseq_swap_iterator_next(problem_void::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Cint
+    problem_ptr = convert(Ptr{TSPProblem}(problem_void))
+    problem = unsafe_load(problem_ptr)
+    iterator_ptr = convert(Ptr{MoveSwap}(iterator_void))
+    iterator = unsafe_load(iterator_ptr)
+    return Int32(nsseq_swap_iterator_is_done(problem, iterator))
+end
+
+function nsseq_swap_iterator_current(_::TSPProblem, iterator::MoveSwap)
+    return deepcopy(iterator)
+end
+
+function nsseq_swap_iterator_current(problem_void::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Ptr{Cvoid}
+    iterator = load_void_into_obj(iterator_void, MoveSwap)
+    problem = load_void_into_obj(problem_void, MoveSwap)
+    iterator_copy = nsseq_swap_iterator_current(problem, iterator)
+    iterator_copy_pointer = OptFrame.global_register(iterator_copy)
+    return Ptr{Cvoid}(iterator_copy_pointer)
 end
 
 end # modules TravelingSalesman
