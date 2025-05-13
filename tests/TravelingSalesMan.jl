@@ -8,6 +8,7 @@ export TSPProblem, TSPSolution
 export initialize_tsp_problem, generate_random_initial_solution
 export evaluate_solution, callback_deep_copy
 export callback_tostring_tsp, free_tsp_solution
+export generate_random_move_swap, apply_move_swap
 
 mutable struct TSPProblem
     engine::OptFrame.Engine
@@ -20,6 +21,11 @@ end
 mutable struct TSPSolution
     path_size::Cint
     cities_path::Vector{Cint}
+end
+
+mutable struct MoveSwap
+    index_i::Cint
+    index_j::Cint
 end
 
 function euclidean_distance(x1::Cint, y1::Cint, x2::Cint, y2::Cint)::Cfloat
@@ -114,6 +120,21 @@ function free_tsp_solution(s_ptr_void::Ptr{Nothing})::Int32
     s_ptr = convert(Ptr{TSPSolution}, s_ptr_void)
     OptFrame.global_unregister(s_ptr)
     return 0
+end
+
+function generate_random_move_swap(_::TSPProblem, solution::TSPSolution)::MoveSwap
+    index_i = rand(1:solution.path_size)
+    index_j = rand(2:solution.path_size)
+    if index_j == index_i
+        index_j = 1
+    end
+    return MoveSwap(index_i, index_j)
+end
+
+function apply_move_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution)::MoveSwap
+    solution.cities_path[move.index_i], solution.cities_path[move.index_j] =
+        solution.cities_path[move.index_j], solution.cities_path[move.index_i]
+    return deepcopy(move)
 end
 
 end # modules TravelingSalesman

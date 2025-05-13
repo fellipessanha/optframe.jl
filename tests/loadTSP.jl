@@ -5,9 +5,9 @@ using .OptFrame
 include("./TravelingSalesMan.jl")
 using .TravelingSalesMan
 
-cities = [1, 2, 3]
-x_coordinates = [10, 20, 30]
-y_coordinates = [10, 20, 30]
+cities = [i for i in 1:20]
+x_coordinates = [10 * i for i in 1:length(cities)]
+y_coordinates = [Int64(round(10 * cos(deg2rad(10 * i)))) for i in 1:length(cities)]
 
 problem = initialize_tsp_problem(cities, x_coordinates, y_coordinates)
 
@@ -47,4 +47,18 @@ free_tsp_solution_pointer = @cfunction(free_tsp_solution, Cint, (Ptr{Cvoid},))
 
 constructive_index = add_constructive(problem.engine, initial_solution_pointer, problem_void, deepcopy_callback_pointer, tostring_callback_pointer, free_tsp_solution_pointer)
 println("created component OptFrame:Constructive ", constructive_index)
+
+initial_search_index = create_initial_search(problem.engine, evaluator_index, constructive_index)
+
+println("created component OptFrame:InitialSearch ", initial_search_index)
+
+swap_move = generate_random_move_swap(problem, solution)
+
+println("generated swap move:", swap_move)
+println("pre-swap solution: ", solution)
+
+apply_move_swap(problem, swap_move, solution)
+
+println("post-swap solution: ", solution)
+
 
