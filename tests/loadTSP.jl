@@ -11,6 +11,10 @@ y_coordinates = [Int64(round(10 * cos(deg2rad(10 * i)))) for i in 1:length(citie
 
 problem = initialize_tsp_problem(cities, x_coordinates, y_coordinates)
 
+# Verbosity filter 4 is disabled. Filter -1 is debug.
+b2 = experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "-1")
+println("b2=", b2)
+
 println(problem)
 
 problem_ptr = Ptr{TSPProblem}(pointer_from_objref(problem))
@@ -73,31 +77,29 @@ idx_ns = add_ns(
 )
 println("created component OptFrame:NS:FNS ", idx_ns)
 
-
-
-iterator_init_ptr = @cfunction(nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
-iterator_first_ptr = @cfunction(nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_next_ptr = @cfunction(nsseq_swap_iterator_next, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_is_done_ptr = @cfunction(nsseq_swap_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_current_ptr = @cfunction(nsseq_swap_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
-
-nsseq_idx = add_nsseq(
-    problem.engine,
-    initial_solution_pointer,
-    iterator_init_ptr,
-    iterator_first_ptr,
-    iterator_next_ptr,
-    iterator_is_done_ptr,
-    iterator_current_ptr,
-    apply_move_pointer,
-    equals_move_pointer,
-    can_be_applied_move_pointer,
-    problem_void,
-    decref_callback_ptr
-)
-println("added nsseq with idx = ", nsseq_idx)
+# iterator_init_ptr = @cfunction(nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+# iterator_first_ptr = @cfunction(nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
+# iterator_next_ptr = @cfunction(nsseq_swap_iterator_next, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
+# iterator_is_done_ptr = @cfunction(nsseq_swap_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
+# iterator_current_ptr = @cfunction(nsseq_swap_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
+#
+# nsseq_idx = add_nsseq(
+#     problem.engine,
+#     initial_solution_pointer,
+#     iterator_init_ptr,
+#     iterator_first_ptr,
+#     iterator_next_ptr,
+#     iterator_is_done_ptr,
+#     iterator_current_ptr,
+#     apply_move_pointer,
+#     equals_move_pointer,
+#     can_be_applied_move_pointer,
+#     problem_void,
+#     decref_callback_ptr
+# )
+# println("added nsseq with idx = ", nsseq_idx)
 
 println("try check (with disabled prints)")
-res = check(problem.engine, 5, 3, false)
+res = check(problem.engine, 2, 2, true)
 println("check=", res)
 

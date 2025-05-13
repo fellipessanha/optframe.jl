@@ -33,7 +33,7 @@ mutable struct MoveSwap
 end
 
 function load_void_into_obj(pointer::Ptr{Cvoid}, type::Type)
-    object = convert(Ptr{type}, Ptr{pointer})
+    object = convert(Ptr{type}, pointer)
     return unsafe_load(object)
 end
 
@@ -102,8 +102,8 @@ function evaluate_solution(problem::TSPProblem, solution::TSPSolution)::Float64
 end
 
 function evaluate_solution(problem_ptr::Ptr{TSPProblem}, solution_ptr::Ptr{TSPSolution})::Float64
-    problem = load_void_into_obj(problem_ptr, TSPProblem)
-    solution = load_void_into_obj(solution_ptr, TSPSolution)
+    problem = unsafe_load(problem_ptr)
+    solution = unsafe_load(solution_ptr)
     return evaluate_solution(problem, solution)
 end
 
@@ -174,26 +174,23 @@ end
 
 function move_is_equal_swap(problem_void::Ptr{Cvoid}, move_a_void::Ptr{Cvoid}, move_b_void::Ptr{Cvoid})::Cint
     problem = load_void_into_obj(problem_void, TSPProblem)
-    move_a = load_void_into_obj(move_a_void, Ptr{MoveSwap})
-    move_b = load_void_into_obj(move_b_void, Ptr{MoveSwap})
+    move_a = load_void_into_obj(move_a_void, MoveSwap)
+    move_b = load_void_into_obj(move_b_void, MoveSwap)
     return Int32(move_is_equal_swap(problem, move_a, move_b))
 end
 
-function move_can_be_applied_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution)::MoveSwap
+function move_can_be_applied_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution)::Bool
     return move.index_i != move.index_j &&
            move.index_i < solution.path_size &&
            move.index_j < solution.path_size
 end
 
-function move_can_be_applied_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid})::Ptr{Cvoid}
-    problem = load_void_into_obj(problem_void, Ptr{MoveSwap})
-    move = load_void_into_obj(move_void, Ptr{MoveSwap})
+function move_can_be_applied_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid})::Cint
+    problem = load_void_into_obj(problem_void, TSPProblem)
+    move = load_void_into_obj(move_void, MoveSwap)
     solution = load_void_into_obj(solution_void, TSPSolution)
-    move_applied = move_can_be_applied_swap(problem, move, solution)
-    applied_pointer = OptFrame.global_register(move_applied)
-    return Ptr{Cvoid}(applied_pointer)
+    return Cint(move_can_be_applied_swap(problem, move, solution))
 end
-
 function nsseq_swap_iterator_init()::MoveSwap
     return MoveSwap(Cint(1), Cint(1))
 end

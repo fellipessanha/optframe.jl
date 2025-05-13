@@ -201,8 +201,8 @@ lout_sol = unsafe_load(lout_sol_ptr)
 println(lout_sol)
 println(problem)
 
-println("try check (with disabled prints)")
-res = check(problem.engine, 5, 3, false)
+println("try check")
+res = check(problem.engine, -1, -1, true)
 println("check=", res)
 
 println("Finished!")
