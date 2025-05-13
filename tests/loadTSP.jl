@@ -31,10 +31,8 @@ println("deep copying solution. got: ", solution_copy)
 println("evaluating solution...")
 
 evaluation = evaluate_solution(problem, solution)
-evaluation_from_ptr = evaluate_solution(problem_ptr, solution_ptr)
 
 println("evaluation from object: ", evaluation)
-println("evaluation from pointer: ", evaluation_from_ptr)
 
 evaluator_pointer = @cfunction(evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoid}))
 evaluator_index = add_evaluator(problem.engine, evaluator_pointer, false, problem_void)
@@ -98,4 +96,8 @@ nsseq_idx = add_nsseq(
     decref_callback_ptr
 )
 println("added nsseq with idx = ", nsseq_idx)
+
+println("try check (with disabled prints)")
+res = check(problem.engine, 5, 3, false)
+println("check=", res)
 

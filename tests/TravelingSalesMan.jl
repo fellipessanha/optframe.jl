@@ -19,7 +19,7 @@ mutable struct TSPProblem
     number_of_cities::Cint
     x_coordinates::Vector{Cint}
     y_coordinates::Vector{Cint}
-    distances::Vector{Vector{Cfloat}}
+    distances::Vector{Vector{Float64}}
 end
 
 mutable struct TSPSolution
@@ -33,19 +33,19 @@ mutable struct MoveSwap
 end
 
 function load_void_into_obj(pointer::Ptr{Cvoid}, type::Type)
-    object = convert(Ptr{type}, pointer)
+    object = convert(Ptr{type}, Ptr{pointer})
     return unsafe_load(object)
 end
 
-function euclidean_distance(x1::Cint, y1::Cint, x2::Cint, y2::Cint)::Cfloat
+function euclidean_distance(x1::Cint, y1::Cint, x2::Cint, y2::Cint)::Float64
     return sqrt((x2 - x1)^2 + (y2 - y1)^2)
 end
 
 function initialize_tsp_problem(cities::Vector{Cint}, x_coordinates::Vector{Cint}, y_coordinates::Vector{Cint}, log_level::Cint)::TSPProblem
     n_cities = Cint(length(cities))
-    distances::Vector{Vector{Cfloat}} = []
+    distances::Vector{Vector{Float64}} = []
     for i in 1:n_cities
-        row::Vector{Cfloat} = []
+        row::Vector{Float64} = []
         for j in 1:n_cities
             push!(row, euclidean_distance(x_coordinates[i], y_coordinates[i], x_coordinates[j], y_coordinates[j]))
         end
@@ -85,18 +85,14 @@ function callback_deep_copy(solution::TSPSolution)::TSPSolution
     return deepcopy(solution)
 end
 
-function callback_deep_copy(solution_ptr::Ptr{TSPSolution})::Ptr{TSPSolution}
-    solution = unsafe_load(solution_ptr)
-    solution_copy = callback_deep_copy(solution)
-    return Ptr{TSPSolution}(solution_copy)
-end
-
 function callback_deep_copy(solution_void::Ptr{Cvoid})::Ptr{Cvoid}
-    solution_ptr = convert(Ptr{TSPSolution}, solution_void)
-    return callback_deep_copy(solution_ptr)
+    solution = load_void_into_obj(solution_void, TSPSolution)
+    copy_solution = callback_deep_copy(solution)
+    copy_pointer = OptFrame.global_register(copy_solution)
+    return Ptr{Cvoid}(copy_pointer)
 end
 
-function evaluate_solution(problem::TSPProblem, solution::TSPSolution)::Cfloat
+function evaluate_solution(problem::TSPProblem, solution::TSPSolution)::Float64
     evaluation = 0
     for i in 1:solution.path_size
         city1, city2 = solution.cities_path[i], solution.cities_path[(i+1)%solution.path_size+1]
@@ -105,14 +101,16 @@ function evaluate_solution(problem::TSPProblem, solution::TSPSolution)::Cfloat
     return evaluation
 end
 
-function evaluate_solution(problem_ptr::Ptr{TSPProblem}, solution_ptr::Ptr{TSPSolution})::Cfloat
-    problem = unsafe_load(problem_ptr)
-    solution = unsafe_load(solution_ptr)
+function evaluate_solution(problem_ptr::Ptr{TSPProblem}, solution_ptr::Ptr{TSPSolution})::Float64
+    problem = load_void_into_obj(problem_ptr, TSPProblem)
+    solution = load_void_into_obj(solution_ptr, TSPSolution)
     return evaluate_solution(problem, solution)
 end
 
-function evaluate_solution(problem_ptr::Ptr{TSPProblem}, solution::TSPSolution)::Cfloat
-    problem = unsafe_load(problem_ptr)
+
+function evaluate_solution(problem_ptr::Ptr{Cvoid}, solution_ptr::Ptr{Cvoid})::Float64
+    problem = load_void_into_obj(problem_ptr, TSPProblem)
+    solution = load_void_into_obj(solution_ptr, TSPSolution)
     return evaluate_solution(problem, solution)
 end
 
@@ -132,18 +130,31 @@ function free_tsp_solution(s_ptr_void::Ptr{Nothing})::Int32
 end
 
 function generate_random_move_swap(_::TSPProblem, solution::TSPSolution)::MoveSwap
-    index_i = rand(1:solution.path_size)
-    index_j = rand(2:solution.path_size)
-    if index_j == index_i
-        index_j = 1
-    end
+    index_i = rand(1:solution.path_size-1)
+    index_j = rand(index_i:solution.path_size)
     return MoveSwap(index_i, index_j)
+end
+
+function generate_random_move_swap(problem_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid})::Ptr{Cvoid}
+    problem = load_void_into_obj(problem_void, TSPProblem)
+    solution = load_void_into_obj(solution_void, TSPSolution)
+    move = generate_random_move_swap(problem, solution)
+    move_pointer = OptFrame.global_register(move)
+    return Ptr{Cvoid}(move_pointer)
 end
 
 function apply_move_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution)::MoveSwap
     solution.cities_path[move.index_i], solution.cities_path[move.index_j] =
         solution.cities_path[move.index_j], solution.cities_path[move.index_i]
     return deepcopy(move)
+end
+
+function apply_move_swap(problem_pointer::Ptr{MoveSwap}, move_pointer::Ptr{MoveSwap}, solution::TSPSolution)::Ptr{Cvoid}
+    problem = unsafe_load(problem_pointer)
+    move = unsafe_load(move_pointer)
+    move_applied = apply_move_swap(problem, move, solution)
+    applied_pointer = OptFrame.global_register(move_applied)
+    return Ptr{Cvoid}(applied_pointer)
 end
 
 function apply_move_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Nothing})::Ptr{Cvoid}
@@ -170,21 +181,21 @@ end
 
 function move_can_be_applied_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution)::MoveSwap
     return move.index_i != move.index_j &&
-           move.index_i <= solution.path_size &&
-           move.index_j <= solution.path_size
+           move.index_i < solution.path_size &&
+           move.index_j < solution.path_size
 end
 
 function move_can_be_applied_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid})::Ptr{Cvoid}
     problem = load_void_into_obj(problem_void, Ptr{MoveSwap})
     move = load_void_into_obj(move_void, Ptr{MoveSwap})
     solution = load_void_into_obj(solution_void, TSPSolution)
-    move_applied = apply_move_swap(problem, move, solution)
-    applied_pointer = OptFrame.globa_register(move_applied)
+    move_applied = move_can_be_applied_swap(problem, move, solution)
+    applied_pointer = OptFrame.global_register(move_applied)
     return Ptr{Cvoid}(applied_pointer)
 end
 
 function nsseq_swap_iterator_init()::MoveSwap
-    return MoveSwap(Cint(-1), Cint(-1))
+    return MoveSwap(Cint(1), Cint(1))
 end
 
 function nsseq_swap_iterator_init(_::TSPProblem, _::TSPSolution)::MoveSwap
@@ -221,13 +232,11 @@ function nsseq_swap_iterator_next(problem::TSPProblem, iterator::MoveSwap)::Noth
 end
 
 
-function nsseq_swap_iterator_next(_::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Cint
-    iterator_ptr = convert(Ptr{MoveSwap}(iterator_void))
-    iterator::MoveSwap = unsafe_pointer_to_objref(iterator_ptr)
-    iterator.index_i = 1
-    iterator.index_i = 2
-    void_return = Int32(0)
-    return void_return
+function nsseq_swap_iterator_next(problem_void::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Cint
+    problem = load_void_into_obj(problem_void, TSPProblem)
+    iterator::MoveSwap = load_void_into_obj(iterator_void, MoveSwap)
+    nsseq_swap_iterator_next(problem, iterator)
+    return iterator.index_i
 end
 
 
