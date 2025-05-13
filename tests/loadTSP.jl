@@ -76,27 +76,27 @@ idx_ns = add_ns(
 )
 println("created component OptFrame:NS:FNS ", idx_ns)
 
-# iterator_init_ptr = @cfunction(nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
-# iterator_first_ptr = @cfunction(nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-# iterator_next_ptr = @cfunction(nsseq_swap_iterator_next, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-# iterator_is_done_ptr = @cfunction(nsseq_swap_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-# iterator_current_ptr = @cfunction(nsseq_swap_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
-#
-# nsseq_idx = add_nsseq(
-#     problem.engine,
-#     initial_solution_pointer,
-#     iterator_init_ptr,
-#     iterator_first_ptr,
-#     iterator_next_ptr,
-#     iterator_is_done_ptr,
-#     iterator_current_ptr,
-#     apply_move_pointer,
-#     equals_move_pointer,
-#     can_be_applied_move_pointer,
-#     problem_void,
-#     decref_callback_ptr
-# )
-# println("added nsseq with idx = ", nsseq_idx)
+iterator_init_ptr = @cfunction(nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+iterator_first_ptr = @cfunction(nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_next_ptr = @cfunction(nsseq_swap_iterator_next, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_is_done_ptr = @cfunction(nsseq_swap_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_current_ptr = @cfunction(nsseq_swap_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
+
+nsseq_idx = add_nsseq(
+    problem.engine,
+    initial_solution_pointer,
+    iterator_init_ptr,
+    iterator_first_ptr,
+    iterator_next_ptr,
+    iterator_is_done_ptr,
+    iterator_current_ptr,
+    apply_move_pointer,
+    equals_move_pointer,
+    can_be_applied_move_pointer,
+    problem_void,
+    free_tsp_solution_pointer
+)
+println("added nsseq with idx = ", nsseq_idx)
 
 println("try check (with disabled prints)")
 res = check(problem.engine, 2, 2, true)

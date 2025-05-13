@@ -212,10 +212,10 @@ end
 
 function nsseq_swap_iterator_first(problem_void::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Cint
     problem = load_void_into_obj(problem_void, TSPProblem)
-    iterator_ptr = convert(Ptr{MoveSwap}(iterator_void))
+    iterator_ptr = convert(Ptr{MoveSwap}, iterator_void)
     iterator::MoveSwap = unsafe_pointer_to_objref(iterator_ptr)
     nsseq_swap_iterator_first(problem, iterator)
-    void_return = Int32(0)
+    void_return = iterator.index_i
     return void_return
 end
 
