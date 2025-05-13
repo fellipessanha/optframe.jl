@@ -113,7 +113,7 @@ nsseq_idx = add_nsseq(
     f_moveapply_ptr,
     f_moveeq_ptr,
     f_movecba_ptr,
-    Ptr{Nothing}(problem_ptr), 
+    Ptr{Nothing}(problem_ptr),
     decref_callback_ptr
 )
 
@@ -125,8 +125,8 @@ initial_search_index = create_initial_search(problem.engine, idx_ev, idx_c)
 println("created initial search with index ", initial_search_index)
 
 # Verbosity filter 4 is disabled. Filter -1 is debug.
-b=experimental_set_parameter(problem.engine, "ENGINE_LOG_LEVEL", "4")
-println("b=",b)
+b = experimental_set_parameter(problem.engine, "ENGINE_LOG_LEVEL", "4")
+println("b=", b)
 
 component_list_index = create_component_list(problem.engine, "[OptFrame:NS 0]", "OptFrame:NS[]")
 
@@ -183,8 +183,8 @@ println("pert_idx=", pert_idx)
 list_engine_components(problem.engine, "OptFrame:")
 
 # Verbosity filter 4 is disabled. Filter -1 is debug.
-b2=experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "4")
-println("b2=",b2)
+b2 = experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "4")
+println("b2=", b2)
 
 sos_idx = build_single_obj_search(problem.engine,
     "OptFrame:ComponentBuilder:SingleObjSearch:ILS:ILSLevels",
