@@ -240,25 +240,19 @@ end
 
 function nsseq_swap_iterator_first(_::TSPProblem, iterator::MoveSwap)::Cvoid
     iterator.index_i = 1
-    iterator.index_j = 2
+    iterator.index_j = 3
 end
 
 function nsseq_swap_iterator_first(problem_void::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Cint
-    println("begin nsseq_swap_iterator_first()")
-
+    #println("begin nsseq_swap_iterator_first()")
     p = convert(Ptr{TSPProblem}, problem_void)
     problem = unsafe_load(p)
     void_return = Int32(0)
     it = convert(Ptr{MoveSwap}, iterator_void)
     it2 = unsafe_pointer_to_objref(it)
     it2.index_i = 1
-    it2.index_j = 2
-    # problem = load_void_into_obj(problem_void, TSPProblem)
-    # iterator_ptr = convert(Ptr{MoveSwap}, iterator_void)
-    # iterator::MoveSwap = unsafe_pointer_to_objref(iterator_ptr)
-    # nsseq_swap_iterator_first(problem, iterator)
-    # void_return = iterator.index_i
-    println("end nsseq_swap_iterator_first")
+    it2.index_j = 3
+    #println("end nsseq_swap_iterator_first")
     return void_return
 end
 
@@ -290,12 +284,12 @@ function nsseq_swap_iterator_is_done(problem::TSPProblem, iterator::MoveSwap)::B
 end
 
 function nsseq_swap_iterator_is_done(problem_void::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Cint
-    println("begin nsseq_swap_iterator_is_done()")
+    #println("begin nsseq_swap_iterator_is_done()")
     problem_ptr = convert(Ptr{TSPProblem}, problem_void)
     problem = unsafe_load(problem_ptr)
     iterator_ptr = convert(Ptr{MoveSwap}, iterator_void)
     iterator = unsafe_load(iterator_ptr)
-    println("end nsseq_swap_iterator_is_done")
+    #println("end nsseq_swap_iterator_is_done")
     return Int32(nsseq_swap_iterator_is_done(problem, iterator))
 end
 
@@ -304,7 +298,7 @@ function nsseq_swap_iterator_current(_::TSPProblem, iterator::MoveSwap)
 end
 
 function nsseq_swap_iterator_current(problem_void::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Ptr{Cvoid}
-    println("begin nsseq_swap_iterator_current")
+    #println("begin nsseq_swap_iterator_current")
     problem = load_void_into_obj(problem_void, TSPProblem)
     iterator = load_void_into_obj(iterator_void, MoveSwap)
     iterator_copy = nsseq_swap_iterator_current(problem, iterator)
