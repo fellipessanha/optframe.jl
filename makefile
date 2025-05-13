@@ -6,13 +6,22 @@ build/optframe_lib.so:
 	cd thirdparty/optframe-external/ && make optframe_lib_test
 	mkdir -p build/
 	mv thirdparty/optframe-external/build/*.so build/
+	ln -s build/optframe_lib.so test/
 
-test: build/optframe_lib.so
-	cp build/*.so tests/
-	echo "Test 1"
+test: build/optframe_lib.so test_init test_kp test_tsp
+
+test_init:
+	echo "test Load Optframe"
 	cd tests && julia LoadOptFrame.jl
-	echo "Test 2"
+
+test_kp: build/optframe_lib.so
+	echo "Test kp"
 	cd tests && julia LoadKP.jl
+
+test_tsp:
+	echo "Test tsp"
+	cd tests && julia loadTSP.jl
+
 
 clean:
 	rm -f build/optframe_lib.so
