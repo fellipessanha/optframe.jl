@@ -93,7 +93,7 @@ function callback_deep_copy(solution_void::Ptr{Cvoid})::Ptr{Cvoid}
 end
 
 function evaluate_solution(problem::TSPProblem, solution::TSPSolution)::Float64
-    evaluation = 0
+    evaluation = 0.0
     for i in 1:solution.path_size
         city1, city2 = solution.cities_path[i], solution.cities_path[(i+1)%solution.path_size+1]
         evaluation += problem.distances[city1][city2]
@@ -130,8 +130,9 @@ function free_tsp_solution(s_ptr_void::Ptr{Nothing})::Int32
 end
 
 function generate_random_move_swap(_::TSPProblem, solution::TSPSolution)::MoveSwap
-    index_i = rand(1:solution.path_size-1)
-    index_j = rand(index_i:solution.path_size)
+    index_i = rand(1:solution.path_size-2)
+    index_j = rand(index_i+1:solution.path_size)
+    abs(index_i-index_j)>=1 ||  error("bad move swap")
     return MoveSwap(index_i, index_j)
 end
 
@@ -164,6 +165,38 @@ function apply_move_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, soluti
     move_applied = apply_move_swap(problem, move, solution)
     applied_pointer = OptFrame.global_register(move_applied)
     return Ptr{Cvoid}(applied_pointer)
+end
+
+function apply_update_move_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution, e::Float64)::PairMoveDoubleLib
+    diff = 0.0
+    println("apply update i=",move.index_i, " j=",move.index_j)
+    n = problem.number_of_cities
+    before_i = ((n + move.index_i - 1) % n) + 1
+    after_i  = ((n + move.index_i + 1) % n) + 1
+    before_j = ((n + move.index_j - 1) % n) + 1
+    after_j  = ((n + move.index_j + 1) % n) + 1
+
+    diff -= problem.distances[before_i][move.index_i]
+    diff -= problem.distances[move.index_i][after_i]
+    diff -= problem.distances[before_j][move.index_j]
+    diff -= problem.distances[move.index_j][after_j]
+    diff += problem.distances[before_i][move.index_j]
+    diff += problem.distances[move.index_j][after_i]
+    diff += problem.distances[before_j][move.index_i]
+    diff += problem.distances[move.index_i][after_j]
+
+    solution.cities_path[move.index_i], solution.cities_path[move.index_j] =
+        solution.cities_path[move.index_j], solution.cities_path[move.index_i]
+
+    return PairMoveDoubleLib(OptFrame.global_register(deepcopy(move)), diff)
+end
+
+function apply_update_move_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid}, e::Cdouble)::PairMoveDoubleLib
+    problem = load_void_into_obj(problem_void, TSPProblem)
+    move = load_void_into_obj(move_void, MoveSwap)
+    solution = load_void_into_obj(solution_void, TSPSolution)
+    pair_md = apply_update_move_swap(problem, move, solution, e)
+    return pair_md
 end
 
 function move_is_equal_swap(_::TSPProblem, move_a::MoveSwap, move_b::MoveSwap)::Bool

@@ -7,6 +7,7 @@ export add_ns, add_nsseq
 export create_component_list, list_engine_components, list_builders, build_component
 export create_initial_search, build_global_search, build_local_search, run_global_search, build_single_obj_search, run_single_obj_search
 export experimental_set_parameter
+export add_ns_v2
 
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid},Any}()
@@ -152,6 +153,43 @@ function add_ns(
 	)
     return idx_ns
 end
+
+struct PairMoveDoubleLib
+    first::Ptr{Cvoid}
+    second::Float64
+end
+
+function optframe_api2d_add_ns(e_ptr::Ptr{Cvoid}, fns_rand, fmove_apply, fmove_eq, fmove_cba, problemCtx::Ptr, decref_callback_ptr, fmove_apply_update)
+    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api2d_add_ns")
+    return @ccall $creation_symbol(
+        e_ptr::Ptr{Cvoid},
+        fns_rand::Ptr{Cvoid},
+        fmove_apply::Ptr{Cvoid},
+        fmove_eq::Ptr{Cvoid},
+        fmove_cba::Ptr{Cvoid},
+        problemCtx::Ptr{Cvoid},
+        decref_callback_ptr::Ptr{Cvoid},
+        fmove_apply_update::Ptr{Cvoid}
+    )::Cint
+end
+
+function add_ns_v2(
+	e::Engine,
+	fns_rand::Ptr{Nothing},
+    fmove_apply::Ptr{Nothing},
+	fmove_eq::Ptr{Nothing},
+	fmove_cba::Ptr{Nothing},
+    problemCtx::Ptr{Nothing},
+	decref_callback_ptr::Ptr{Nothing},
+    fmove_apply_update::Ptr{Nothing}
+)
+    # TODO: keep function pointers?
+    idx_ns = optframe_api2d_add_ns(
+		e.hf, fns_rand, fmove_apply, fmove_eq, fmove_cba, problemCtx, decref_callback_ptr, fmove_apply_update
+	)
+    return idx_ns
+end
+
 
 function optframe_api1d_engine_list_components(engine::Ptr{Cvoid}, prefix::Cstring)
     creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_engine_list_components")
