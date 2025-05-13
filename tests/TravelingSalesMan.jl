@@ -5,6 +5,7 @@ import ..OptFrame
 using Random: shuffle
 
 export TSPProblem, TSPSolution
+export parse_trp_file
 export initialize_tsp_problem, generate_random_initial_solution
 export evaluate_solution, callback_deep_copy
 export callback_tostring_tsp, free_tsp_solution
@@ -17,8 +18,8 @@ export nsseq_swap_iterator_is_done
 mutable struct TSPProblem
     engine::OptFrame.Engine
     number_of_cities::Cint
-    x_coordinates::Vector{Cint}
-    y_coordinates::Vector{Cint}
+    x_coordinates::Vector{Float64}
+    y_coordinates::Vector{Float64}
     distances::Vector{Vector{Float64}}
 end
 
@@ -37,11 +38,43 @@ function load_void_into_obj(pointer::Ptr{Cvoid}, type::Type)
     return unsafe_load(object)
 end
 
-function euclidean_distance(x1::Cint, y1::Cint, x2::Cint, y2::Cint)::Float64
+# Function to parse the file and extract coordinates
+function parse_trp_file(file_path::String)
+    # Initialize empty arrays for x and y coordinates
+    x_coordinates = Float64[]
+    y_coordinates = Float64[]
+
+    # Open the file for reading
+    open(file_path, "r") do file
+        # Read through each line of the file
+        for line in eachline(file)
+            # Check if the line starts with "NODE_COORD_SECTION"
+            if line == "NODE_COORD_SECTION"
+                # Start reading coordinates from the next line
+                for coord_line in eachline(file)
+                    # Split the line into parts
+                    parts = split(coord_line)
+                    # Break if we reach the end of the coordinates section
+                    if isempty(parts) || length(parts) < 3
+                        break
+                    end
+                    # Parse x and y coordinates, ignoring the first column
+                    push!(x_coordinates, parse(Float64, parts[2]))
+                    push!(y_coordinates, parse(Float64, parts[3]))
+                end
+                break  # Exit after processing the coordinates section
+            end
+        end
+    end
+
+    return x_coordinates, y_coordinates
+end
+
+function euclidean_distance(x1::Float64, y1::Float64, x2::Float64, y2::Float64)::Float64
     return sqrt((x2 - x1)^2 + (y2 - y1)^2)
 end
 
-function initialize_tsp_problem(cities::Vector{Cint}, x_coordinates::Vector{Cint}, y_coordinates::Vector{Cint}, log_level::Cint)::TSPProblem
+function initialize_tsp_problem(cities::Vector{Cint}, x_coordinates::Vector{Float64}, y_coordinates::Vector{Float64}, log_level::Cint)::TSPProblem
     n_cities = Cint(length(cities))
     distances::Vector{Vector{Float64}} = []
     for i in 1:n_cities
@@ -54,15 +87,14 @@ function initialize_tsp_problem(cities::Vector{Cint}, x_coordinates::Vector{Cint
     return TSPProblem(OptFrame.init_engine(log_level), n_cities, x_coordinates, y_coordinates, distances)
 end
 
-function initialize_tsp_problem(cities::Vector{Int64}, x_coordinates::Vector{Int64}, y_coordinates::Vector{Int64})::TSPProblem
-    return initialize_tsp_problem(cities, x_coordinates, y_coordinates, 0)
+function initialize_tsp_problem(cities::Vector{Int32}, x_coordinates::Vector{Float64}, y_coordinates::Vector{Float64})::TSPProblem
+    cint_cities = [Int32(c) for c in cities]
+    return initialize_tsp_problem(cint_cities, x_coordinates, y_coordinates, Cint(0))
 end
 
-function initialize_tsp_problem(cities::Vector{Int64}, x_coordinates::Vector{Int64}, y_coordinates::Vector{Int64}, log_level::Int64)::TSPProblem
-    cint_cities = [Cint(city) for city in cities]
-    cint_x = [Cint(x) for x in x_coordinates]
-    cint_y = [Cint(y) for y in y_coordinates]
-    return initialize_tsp_problem(cint_cities, cint_x, cint_y, Cint(log_level))
+function initialize_tsp_problem(cities::Vector{Int64}, x_coordinates::Vector{Float64}, y_coordinates::Vector{Float64})::TSPProblem
+    cint_cities = [Int32(c) for c in cities]
+    return initialize_tsp_problem(cint_cities, x_coordinates, y_coordinates, Cint(0))
 end
 
 function generate_random_initial_solution(problem::TSPProblem)::TSPSolution
@@ -132,7 +164,7 @@ end
 function generate_random_move_swap(_::TSPProblem, solution::TSPSolution)::MoveSwap
     index_i = rand(1:solution.path_size-2)
     index_j = rand(index_i+1:solution.path_size)
-    abs(index_i-index_j)>=1 ||  error("bad move swap")
+    abs(index_i - index_j) >= 1 || error("bad move swap")
     return MoveSwap(index_i, index_j)
 end
 
@@ -169,12 +201,12 @@ end
 
 function apply_update_move_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution, e::Float64)::PairMoveDoubleLib
     diff = 0.0
-    println("apply update i=",move.index_i, " j=",move.index_j)
+    println("apply update i=", move.index_i, " j=", move.index_j)
     n = problem.number_of_cities
     before_i = ((n + move.index_i - 1) % n) + 1
-    after_i  = ((n + move.index_i + 1) % n) + 1
+    after_i = ((n + move.index_i + 1) % n) + 1
     before_j = ((n + move.index_j - 1) % n) + 1
-    after_j  = ((n + move.index_j + 1) % n) + 1
+    after_j = ((n + move.index_j + 1) % n) + 1
 
     diff -= problem.distances[before_i][move.index_i]
     diff -= problem.distances[move.index_i][after_i]
@@ -272,7 +304,7 @@ function nsseq_swap_iterator_next(problem_void::Ptr{Cvoid}, iterator_void::Ptr{C
     # iterator::MoveSwap = load_void_into_obj(iterator_void, MoveSwap)
     it = convert(Ptr{MoveSwap}, iterator_void)
     iterator = unsafe_load(it)
-    iterator=nsseq_swap_iterator_next(problem, iterator)
+    iterator = nsseq_swap_iterator_next(problem, iterator)
     unsafe_store!(it, iterator)
     #return iterator.index_i
     return Int32(0)

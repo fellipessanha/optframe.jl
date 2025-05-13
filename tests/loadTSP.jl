@@ -5,9 +5,8 @@ using .OptFrame
 include("./TravelingSalesMan.jl")
 using .TravelingSalesMan
 
-cities = [i for i in 1:100]
-x_coordinates = [10 * i for i in 1:length(cities)]
-y_coordinates = [Int64(round(10 * cos(deg2rad(10 * i)))) for i in 1:length(cities)]
+x_coordinates, y_coordinates = parse_trp_file("../berlin52.txt")
+cities = [i for i in 1:length(x_coordinates)]
 
 problem = initialize_tsp_problem(cities, x_coordinates, y_coordinates)
 
