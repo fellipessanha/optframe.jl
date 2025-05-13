@@ -39,3 +39,12 @@ println("evaluation from pointer: ", evaluation_from_ptr)
 evaluator_pointer = @cfunction(evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoid}))
 evaluator_index = add_evaluator(problem.engine, evaluator_pointer, false, problem_void)
 println("added evaluator with index ", evaluator_index)
+
+initial_solution_pointer = @cfunction(generate_random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
+deepcopy_callback_pointer = @cfunction(callback_deep_copy, Ptr{Cvoid}, (Ptr{Cvoid},))
+tostring_callback_pointer = @cfunction(callback_tostring_tsp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
+free_tsp_solution_pointer = @cfunction(free_tsp_solution, Cint, (Ptr{Cvoid},))
+
+constructive_index = add_constructive(problem.engine, initial_solution_pointer, problem_void, deepcopy_callback_pointer, tostring_callback_pointer, free_tsp_solution_pointer)
+println("created component OptFrame:Constructive ", constructive_index)
+

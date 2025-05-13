@@ -7,6 +7,7 @@ using Random: shuffle
 export TSPProblem, TSPSolution
 export initialize_tsp_problem, generate_random_initial_solution
 export evaluate_solution, callback_deep_copy
+export callback_tostring_tsp, free_tsp_solution
 
 mutable struct TSPProblem
     engine::OptFrame.Engine
@@ -98,6 +99,21 @@ end
 function evaluate_solution(problem_ptr::Ptr{TSPProblem}, solution::TSPSolution)::Cfloat
     problem = unsafe_load(problem_ptr)
     return evaluate_solution(problem, solution)
+end
+
+
+function callback_tostring_tsp(_::Ptr{Cvoid}, buffer::Ptr{Cchar}, size::Csize_t)::Csize_t
+    s = "solution as string"
+    n = min(sizeof(s), size - 1)
+    unsafe_copyto!(buffer, pointer(s), n)
+    unsafe_store!(buffer + n, 0)
+    return sizeof(s)
+end
+
+function free_tsp_solution(s_ptr_void::Ptr{Nothing})::Int32
+    s_ptr = convert(Ptr{TSPSolution}, s_ptr_void)
+    OptFrame.global_unregister(s_ptr)
+    return 0
 end
 
 end # modules TravelingSalesman
