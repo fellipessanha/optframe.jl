@@ -18,7 +18,7 @@ mutable struct Engine
     hf::Ptr{Cvoid}
 end
 
-const libpath = "./optframe_lib.so"
+const libpath = joinpath(@__DIR__, "..", "build", "optframe_lib.so")
 
 const optframe_ptr = Libdl.dlopen(libpath)
 
