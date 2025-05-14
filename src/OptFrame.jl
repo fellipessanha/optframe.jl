@@ -448,4 +448,6 @@ function welcome(e::Engine)
     optframe_api0d_engine_welcome(e.hf)
 end
 
+include("tsp/tsp.jl")
+
 end # module Optframe
