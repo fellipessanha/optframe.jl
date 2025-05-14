@@ -1,0 +1,11 @@
+name = "OptFrameTSP"
+uuid = "1695480b-46fe-4885-8816-aa0e7adeb995"
+authors = ["igormcoelho", "fellipessanha", "Pedro Maciel Xavier <mail@pedro.ϵλ>"]
+version = "0.1.0"
+
+[deps]
+OptFrame = "872f0478-f731-4413-b44f-091e1a536aab"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[compat]
+Random = "1.11.0"
