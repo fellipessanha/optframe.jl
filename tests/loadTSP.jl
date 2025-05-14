@@ -79,18 +79,17 @@ random_move_pointer_v2 = @cfunction(generate_random_move_swap_v2, Ptr{Cvoid}, (P
 apply_update_move_pointer = @cfunction(apply_update_move_swap, OptFrame.PairMoveDoubleLib, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}, Cdouble))
 free_move_swap_pointer_v2    = @cfunction(free_move_swap_v2, Cint, (Ptr{Cvoid},))
 
-idx_ns = add_ns_v2(
-    problem.engine,
-    random_move_pointer_v2,
-    apply_move_pointer,
-    equals_move_pointer,
-    can_be_applied_move_pointer,
-    problem_void,
-    free_move_swap_pointer_v2,
-    apply_update_move_pointer
-)
-
-println("created component OptFrame:NS:FNS ", idx_ns)
+# idx_ns_v2 = add_ns_v2(
+#     problem.engine,
+#     random_move_pointer_v2,
+#     apply_move_pointer,
+#     equals_move_pointer,
+#     can_be_applied_move_pointer,
+#     problem_void,
+#     free_move_swap_pointer_v2,
+#     apply_update_move_pointer
+# )
+# println("created component OptFrame:NS:FNS ", idx_ns_v2)
 
 iterator_init_ptr = @cfunction(nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
 iterator_first_ptr = @cfunction(nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
