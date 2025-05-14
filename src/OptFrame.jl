@@ -593,20 +593,20 @@ function onfail(code::Cint)::Cint
     return false
 end
 
-default_onfail_ptr = @cfunction(onfail, Cint, (Cint,))
+default_onfail_ptr = @cfunction(onfail, Cint, (Cint,Ptr{Cvoid}))
 
 function optframe_api1d_engine_check(
-    e_ptr::Ptr{Cvoid},
-    p1::Cint,
-    p2::Cint,
+    engine_ptr::Ptr{Cvoid},
+    soft_tests::Cint,
+    hard_tests::Cint,
     verbose::Cint,
     onfail_callback_ptr,
 )
     creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_check")
     return @ccall $creation_symbol(
-        e_ptr::Ptr{Cvoid},
-        p1::Cint,
-        p2::Cint,
+        engine_ptr::Ptr{Cvoid},
+        soft_tests::Cint,
+        hard_tests::Cint,
         verbose::Cint,
         onfail_callback_ptr::Ptr{Cvoid},
     )::Cint
