@@ -28,8 +28,20 @@ mutable struct KnapsackProblem
     engine::OptFrame.Engine
 end
 
-function knapsack_problem_init(vweights::Vector{Float64}, vprofits::Vector{Float64}, nitems::Int64, capacity::Float64, ll::Int64=0)
-    prob = KnapsackProblem(vweights, vprofits, Cint(nitems), capacity, OptFrame.init_engine(ll))
+function knapsack_problem_init(
+    vweights::Vector{Float64},
+    vprofits::Vector{Float64},
+    nitems::Int64,
+    capacity::Float64,
+    ll::Int64 = 0,
+)
+    prob = KnapsackProblem(
+        vweights,
+        vprofits,
+        Cint(nitems),
+        capacity,
+        OptFrame.init_engine(ll),
+    )
     return prob
 end
 
@@ -40,19 +52,22 @@ end
 function evaluate_solution(problem::KnapsackProblem, solution::KnapsackSolution)
     total_weight = 0.0
     profit = 0.0
-    for i in 1:problem.nitems
+    for i = 1:problem.nitems
         if solution.selected[i]
             total_weight += problem.vweights[i]
             profit += problem.vprofits[i]
         end
     end
     if total_weight > problem.capacity
-        profit += 1000.0*(problem.capacity-total_weight)
+        profit += 1000.0 * (problem.capacity - total_weight)
     end
     return profit
 end
 
-function evaluate_solution(p_ptr::Ptr{KnapsackProblem}, s_ptr::Ptr{KnapsackSolution})::Float64
+function evaluate_solution(
+    p_ptr::Ptr{KnapsackProblem},
+    s_ptr::Ptr{KnapsackSolution},
+)::Float64
     problem = unsafe_load(p_ptr)
     solution = unsafe_load(s_ptr)
     return evaluate_solution(problem, solution)
@@ -108,7 +123,11 @@ function free_solution_kp(s_ptr_void::Ptr{Nothing})::Int32
     return 0
 end
 
-function tostring_callback_julia_kp(sol::Ptr{KnapsackSolution}, buffer::Ptr{Cchar}, size::Csize_t)::Csize_t
+function tostring_callback_julia_kp(
+    sol::Ptr{KnapsackSolution},
+    buffer::Ptr{Cchar},
+    size::Csize_t,
+)::Csize_t
     s = "solution as string"
     n = min(sizeof(s), size - 1)
     unsafe_copyto!(buffer, pointer(s), n)
@@ -157,12 +176,20 @@ function ns_rand_bitflip(p_void::Ptr{Nothing}, s_void::Ptr{Nothing})::Ptr{Nothin
     return Ptr{Nothing}(m_raw_ptr)
 end
 
-function move_apply_bitflip(problem::KnapsackProblem, m::MoveBitFlip, solution::KnapsackSolution)::MoveBitFlip
+function move_apply_bitflip(
+    problem::KnapsackProblem,
+    m::MoveBitFlip,
+    solution::KnapsackSolution,
+)::MoveBitFlip
     solution.selected[m.k] = 1 - solution.selected[m.k]
     return MoveBitFlip(m.k)
 end
 
-function move_apply_bitflip(p_void::Ptr{Nothing}, m_void::Ptr{Nothing}, s_void::Ptr{Nothing})::Ptr{Nothing}
+function move_apply_bitflip(
+    p_void::Ptr{Nothing},
+    m_void::Ptr{Nothing},
+    s_void::Ptr{Nothing},
+)::Ptr{Nothing}
     p = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p)
     s = convert(Ptr{KnapsackSolution}, s_void)
@@ -174,11 +201,19 @@ function move_apply_bitflip(p_void::Ptr{Nothing}, m_void::Ptr{Nothing}, s_void::
     return Ptr{Nothing}(m2_raw_ptr)
 end
 
-function move_cba_bitflip(problem::KnapsackProblem, m::MoveBitFlip, solution::KnapsackSolution)::Bool
+function move_cba_bitflip(
+    problem::KnapsackProblem,
+    m::MoveBitFlip,
+    solution::KnapsackSolution,
+)::Bool
     return true
 end
 
-function move_cba_bitflip(p_void::Ptr{Nothing}, m_void::Ptr{Nothing}, s_void::Ptr{Nothing})::Int32
+function move_cba_bitflip(
+    p_void::Ptr{Nothing},
+    m_void::Ptr{Nothing},
+    s_void::Ptr{Nothing},
+)::Int32
     p = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p)
     s = convert(Ptr{KnapsackSolution}, s_void)
@@ -193,7 +228,11 @@ function move_eq_bitflip(problem::KnapsackProblem, m1::MoveBitFlip, m2::MoveBitF
     return m1.k == m2.k
 end
 
-function move_eq_bitflip(p_void::Ptr{Nothing}, m1_void::Ptr{Nothing}, m2_void::Ptr{Nothing})::Int32
+function move_eq_bitflip(
+    p_void::Ptr{Nothing},
+    m1_void::Ptr{Nothing},
+    m2_void::Ptr{Nothing},
+)::Int32
     p_ptr = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p_ptr)
     m1_ptr = convert(Ptr{MoveBitFlip}, m1_void)
@@ -203,11 +242,17 @@ function move_eq_bitflip(p_void::Ptr{Nothing}, m1_void::Ptr{Nothing}, m2_void::P
     return Int32(move_eq_bitflip(problem, m1, m2))
 end
 
-function nsseq_bitflip_iterator_init(problem::KnapsackProblem, solution::KnapsackSolution)::MoveBitFlip
+function nsseq_bitflip_iterator_init(
+    problem::KnapsackProblem,
+    solution::KnapsackSolution,
+)::MoveBitFlip
     return MoveBitFlip(Int32(-1))
 end
 
-function nsseq_bitflip_iterator_init_c(p_void::Ptr{Nothing}, s_void::Ptr{Nothing})::Ptr{Nothing}
+function nsseq_bitflip_iterator_init_c(
+    p_void::Ptr{Nothing},
+    s_void::Ptr{Nothing},
+)::Ptr{Nothing}
     p = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p)
     s = convert(Ptr{KnapsackSolution}, s_void)
@@ -250,7 +295,10 @@ function nsseq_bitflip_iterator_next_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothin
     return iterator.k # workaround on GC to prevent collection... this is Cvoid!
 end
 
-function nsseq_bitflip_iterator_is_done(problem::KnapsackProblem, iterator::MoveBitFlip)::Bool
+function nsseq_bitflip_iterator_is_done(
+    problem::KnapsackProblem,
+    iterator::MoveBitFlip,
+)::Bool
     return iterator.k > problem.nitems
 end
 
@@ -267,11 +315,17 @@ function nsseq_bitflip_iterator_is_done_c(p_void::Ptr{Nothing}, it_void::Ptr{Not
     end
 end
 
-function nsseq_bitflip_iterator_current(problem::KnapsackProblem, iterator::MoveBitFlip)::MoveBitFlip
+function nsseq_bitflip_iterator_current(
+    problem::KnapsackProblem,
+    iterator::MoveBitFlip,
+)::MoveBitFlip
     return deepcopy(iterator)
 end
 
-function nsseq_bitflip_iterator_current_c(p_void::Ptr{Nothing}, it_void::Ptr{Nothing})::Ptr{Nothing}
+function nsseq_bitflip_iterator_current_c(
+    p_void::Ptr{Nothing},
+    it_void::Ptr{Nothing},
+)::Ptr{Nothing}
     p = convert(Ptr{KnapsackProblem}, p_void)
     problem = unsafe_load(p)
     it = convert(Ptr{MoveBitFlip}, it_void)

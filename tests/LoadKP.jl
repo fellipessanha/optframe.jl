@@ -46,10 +46,18 @@ println("created component OptFrame:GeneralEvaluator:Evaluator ", idx_ev)
 println("will try add_constructive")
 f_is_ptr = @cfunction(random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
 f_cp_ptr = @cfunction(callback_sol_deepcopy_kp, Ptr{Cvoid}, (Ptr{Cvoid},))
-f_str_ptr = @cfunction(tostring_callback_julia_kp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
+f_str_ptr =
+    @cfunction(tostring_callback_julia_kp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
 f_del_ptr = @cfunction(free_solution_kp, Cint, (Ptr{Cvoid},))
 
-idx_c = add_constructive(problem.engine, f_is_ptr, Ptr{Nothing}(problem_ptr), f_cp_ptr, f_str_ptr, f_del_ptr)
+idx_c = add_constructive(
+    problem.engine,
+    f_is_ptr,
+    Ptr{Nothing}(problem_ptr),
+    f_cp_ptr,
+    f_str_ptr,
+    f_del_ptr,
+)
 println("created component OptFrame:Constructive ", idx_c)
 
 
@@ -84,23 +92,36 @@ else
 end
 
 println("will try add_constructive")
-f_nsrand_ptr = @cfunction(ns_rand_bitflip, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
-f_moveapply_ptr = @cfunction(move_apply_bitflip, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},))
-f_moveeq_ptr = @cfunction(move_eq_bitflip, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},))
-f_movecba_ptr = @cfunction(move_cba_bitflip, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},))
+f_nsrand_ptr = @cfunction(ns_rand_bitflip, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+f_moveapply_ptr =
+    @cfunction(move_apply_bitflip, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
+f_moveeq_ptr = @cfunction(move_eq_bitflip, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
+f_movecba_ptr = @cfunction(move_cba_bitflip, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
 decref_callback_ptr = @cfunction(free_solution_kp, Cint, (Ptr{Cvoid},))
 
-idx_ns = add_ns(problem.engine, f_nsrand_ptr, f_moveapply_ptr, f_moveeq_ptr,
-    f_movecba_ptr, Ptr{Nothing}(problem_ptr), decref_callback_ptr)
+idx_ns = add_ns(
+    problem.engine,
+    f_nsrand_ptr,
+    f_moveapply_ptr,
+    f_moveeq_ptr,
+    f_movecba_ptr,
+    Ptr{Nothing}(problem_ptr),
+    decref_callback_ptr,
+)
 println("created component OptFrame:NS:FNS ", idx_ns)
 
 println("creating nsseq(neighbor search sequence)")
 
-iterator_init_ptr = @cfunction(nsseq_bitflip_iterator_init_c, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_first_ptr = @cfunction(nsseq_bitflip_iterator_first_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_next_ptr = @cfunction(nsseq_bitflip_iterator_next_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_is_done_ptr = @cfunction(nsseq_bitflip_iterator_is_done_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_current_ptr = @cfunction(nsseq_bitflip_iterator_current_c, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_init_ptr =
+    @cfunction(nsseq_bitflip_iterator_init_c, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+iterator_first_ptr =
+    @cfunction(nsseq_bitflip_iterator_first_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+iterator_next_ptr =
+    @cfunction(nsseq_bitflip_iterator_next_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+iterator_is_done_ptr =
+    @cfunction(nsseq_bitflip_iterator_is_done_c, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+iterator_current_ptr =
+    @cfunction(nsseq_bitflip_iterator_current_c, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
 
 nsseq_idx = add_nsseq(
     problem.engine,
@@ -114,7 +135,7 @@ nsseq_idx = add_nsseq(
     f_moveeq_ptr,
     f_movecba_ptr,
     Ptr{Nothing}(problem_ptr),
-    decref_callback_ptr
+    decref_callback_ptr,
 )
 
 println("added nsseq with idx = ", nsseq_idx)
@@ -128,7 +149,8 @@ println("created initial search with index ", initial_search_index)
 b = experimental_set_parameter(problem.engine, "ENGINE_LOG_LEVEL", "4")
 println("b=", b)
 
-component_list_index = create_component_list(problem.engine, "[OptFrame:NS 0]", "OptFrame:NS[]")
+component_list_index =
+    create_component_list(problem.engine, "[OptFrame:NS 0]", "OptFrame:NS[]")
 
 println(component_list_index)
 
@@ -148,9 +170,11 @@ print("")
 print("testing builder (build_global_search) for SA...")
 print("")
 
-gs_idx = build_global_search(problem.engine,
+gs_idx = build_global_search(
+    problem.engine,
     "OptFrame:ComponentBuilder:GlobalSearch:SA:BasicSA",
-    "OptFrame:GeneralEvaluator:Evaluator 0 OptFrame:InitialSearch 0  OptFrame:NS[] 0 0.99 100 999")
+    "OptFrame:GeneralEvaluator:Evaluator 0 OptFrame:InitialSearch 0  OptFrame:NS[] 0 0.99 100 999",
+)
 println("sos_idx=", gs_idx)
 
 
@@ -169,15 +193,19 @@ println("finished nsseq")
 
 
 
-ls_idx = build_local_search(problem.engine,
+ls_idx = build_local_search(
+    problem.engine,
     "OptFrame:ComponentBuilder:LocalSearch:FI",
-    "OptFrame:GeneralEvaluator:Evaluator 0  OptFrame:NS:NSFind:NSSeq 0")
+    "OptFrame:GeneralEvaluator:Evaluator 0  OptFrame:NS:NSFind:NSSeq 0",
+)
 println("ls_idx=", ls_idx)
 
-pert_idx = build_component(problem.engine,
+pert_idx = build_component(
+    problem.engine,
     "OptFrame:ComponentBuilder:ILS:LevelPert:LPlus2",
     "OptFrame:GeneralEvaluator:Evaluator 0  OptFrame:NS 0",
-    "OptFrame:ILS:LevelPert")
+    "OptFrame:ILS:LevelPert",
+)
 println("pert_idx=", pert_idx)
 
 list_engine_components(problem.engine, "OptFrame:")
@@ -186,9 +214,11 @@ list_engine_components(problem.engine, "OptFrame:")
 b2 = experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "4")
 println("b2=", b2)
 
-sos_idx = build_single_obj_search(problem.engine,
+sos_idx = build_single_obj_search(
+    problem.engine,
     "OptFrame:ComponentBuilder:SingleObjSearch:ILS:ILSLevels",
-    "OptFrame:GeneralEvaluator:Evaluator 0 OptFrame:InitialSearch 0  OptFrame:LocalSearch 0 OptFrame:ILS:LevelPert 0  50  3")
+    "OptFrame:GeneralEvaluator:Evaluator 0 OptFrame:InitialSearch 0  OptFrame:LocalSearch 0 OptFrame:ILS:LevelPert 0  50  3",
+)
 println("sos_idx=", sos_idx)
 
 println("")

@@ -6,7 +6,7 @@ include("./TravelingSalesMan.jl")
 using .TravelingSalesMan
 
 x_coordinates, y_coordinates = parse_trp_file("../berlin52.txt")
-cities = [i for i in 1:length(x_coordinates)]
+cities = [i for i = 1:length(x_coordinates)]
 
 problem = initialize_tsp_problem(cities, x_coordinates, y_coordinates)
 
@@ -41,16 +41,24 @@ evaluator_pointer = @cfunction(evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoi
 evaluator_index = add_evaluator(problem.engine, evaluator_pointer, false, problem_void)
 println("added evaluator with index ", evaluator_index)
 
-initial_solution_pointer = @cfunction(generate_random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
+initial_solution_pointer  = @cfunction(generate_random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
 deepcopy_callback_pointer = @cfunction(callback_deep_copy, Ptr{Cvoid}, (Ptr{Cvoid},))
 tostring_callback_pointer = @cfunction(callback_tostring_tsp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
 free_tsp_solution_pointer = @cfunction(free_tsp_solution, Cint, (Ptr{Cvoid},))
 free_move_swap_pointer    = @cfunction(free_move_swap, Cint, (Ptr{Cvoid},))
 
-constructive_index = add_constructive(problem.engine, initial_solution_pointer, problem_void, deepcopy_callback_pointer, tostring_callback_pointer, free_tsp_solution_pointer)
+constructive_index = add_constructive(
+    problem.engine,
+    initial_solution_pointer,
+    problem_void,
+    deepcopy_callback_pointer,
+    tostring_callback_pointer,
+    free_tsp_solution_pointer,
+)
 println("created component OptFrame:Constructive ", constructive_index)
 
-initial_search_index = create_initial_search(problem.engine, evaluator_index, constructive_index)
+initial_search_index =
+    create_initial_search(problem.engine, evaluator_index, constructive_index)
 
 println("created component OptFrame:InitialSearch ", initial_search_index)
 
@@ -60,10 +68,14 @@ println("generated swap move:", swap_move)
 println("pre-swap solution: ", solution)
 println("post-swap solution: ", solution)
 
-random_move_pointer = @cfunction(generate_random_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
-apply_move_pointer = @cfunction(apply_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},))
-equals_move_pointer = @cfunction(move_is_equal_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},))
-can_be_applied_move_pointer = @cfunction(move_can_be_applied_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},))
+random_move_pointer =
+    @cfunction(generate_random_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+apply_move_pointer =
+    @cfunction(apply_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
+equals_move_pointer =
+    @cfunction(move_is_equal_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
+can_be_applied_move_pointer =
+    @cfunction(move_can_be_applied_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
 
 idx_ns = add_ns(
     problem.engine,
@@ -72,12 +84,17 @@ idx_ns = add_ns(
     equals_move_pointer,
     can_be_applied_move_pointer,
     problem_void,
-    free_move_swap_pointer
+    free_move_swap_pointer,
 )
 
-random_move_pointer_v2 = @cfunction(generate_random_move_swap_v2, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
-apply_update_move_pointer = @cfunction(apply_update_move_swap, OptFrame.PairMoveDoubleLib, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}, Cdouble))
-free_move_swap_pointer_v2    = @cfunction(free_move_swap_v2, Cint, (Ptr{Cvoid},))
+random_move_pointer_v2 =
+    @cfunction(generate_random_move_swap_v2, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+apply_update_move_pointer = @cfunction(
+    apply_update_move_swap,
+    OptFrame.PairMoveDoubleLib,
+    (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}, Cdouble)
+)
+free_move_swap_pointer_v2 = @cfunction(free_move_swap_v2, Cint, (Ptr{Cvoid},))
 
 # idx_ns_v2 = add_ns_v2(
 #     problem.engine,
@@ -91,11 +108,14 @@ free_move_swap_pointer_v2    = @cfunction(free_move_swap_v2, Cint, (Ptr{Cvoid},)
 # )
 # println("created component OptFrame:NS:FNS ", idx_ns_v2)
 
-iterator_init_ptr = @cfunction(nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
-iterator_first_ptr = @cfunction(nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_next_ptr = @cfunction(nsseq_swap_iterator_next, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_is_done_ptr = @cfunction(nsseq_swap_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid},))
-iterator_current_ptr = @cfunction(nsseq_swap_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
+iterator_init_ptr =
+    @cfunction(nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+iterator_first_ptr = @cfunction(nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+iterator_next_ptr = @cfunction(nsseq_swap_iterator_next, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+iterator_is_done_ptr =
+    @cfunction(nsseq_swap_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+iterator_current_ptr =
+    @cfunction(nsseq_swap_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
 
 nsseq_idx = add_nsseq(
     problem.engine,
@@ -109,7 +129,7 @@ nsseq_idx = add_nsseq(
     equals_move_pointer,
     can_be_applied_move_pointer,
     problem_void,
-    free_tsp_solution_pointer
+    free_tsp_solution_pointer,
 )
 println("added nsseq with idx = ", nsseq_idx)
 
