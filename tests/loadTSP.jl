@@ -83,7 +83,7 @@ iterator_current_ptr = @cfunction(nsseq_swap_iterator_current, Ptr{Cvoid}, (Ptr{
 
 nsseq_idx = add_nsseq(
     problem.engine,
-    initial_solution_pointer,
+    random_move_pointer,
     iterator_init_ptr,
     iterator_first_ptr,
     iterator_next_ptr,
