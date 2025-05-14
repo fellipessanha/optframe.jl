@@ -1,2 +1,4 @@
 [deps]
+OptFrameKnapsack = "feb41e8c-8db1-4cd2-8109-f52a96ed631d"
+OptFrameTSP = "1695480b-46fe-4885-8816-aa0e7adeb995"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

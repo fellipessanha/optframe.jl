@@ -9,7 +9,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     problem = TSP.initialize_tsp_problem(cities, x_coordinates, y_coordinates)
 
-    b2 = experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "-1")
+    b2 = OptFrame.experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "-1")
 
     @show b2
 
@@ -124,7 +124,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     @info("try check (with disabled prints)")
 
-    @test check(problem.engine, 300, 5, false)
+    @test OptFrame.check(problem.engine, 300, 5, false)
 
     return nothing
 end
