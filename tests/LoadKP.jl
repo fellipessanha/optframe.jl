@@ -1,4 +1,4 @@
-include("../src/Optframe.jl")
+include("../src/OptFrame.jl")
 using .OptFrame
 #
 include("./Knapsack.jl")

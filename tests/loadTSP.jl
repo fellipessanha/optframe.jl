@@ -1,5 +1,5 @@
 using Base: unsafe_load_commands
-include("../src/Optframe.jl")
+include("../src/OptFrame.jl")
 using .OptFrame
 #
 include("./TravelingSalesMan.jl")
