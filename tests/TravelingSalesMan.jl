@@ -220,7 +220,7 @@ function apply_update_move_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolu
     solution.cities_path[move.index_i], solution.cities_path[move.index_j] =
         solution.cities_path[move.index_j], solution.cities_path[move.index_i]
 
-    return PairMoveDoubleLib(OptFrame.global_register(deepcopy(move)), diff)
+    return PairMoveDoubleLib(Ptr{Cvoid}(OptFrame.global_register(deepcopy(move))), diff)
 end
 
 function apply_update_move_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid}, e::Cdouble)::PairMoveDoubleLib
