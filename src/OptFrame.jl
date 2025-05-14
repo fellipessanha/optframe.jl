@@ -612,12 +612,12 @@ function optframe_api1d_engine_check(
     )::Cint
 end
 
-function check(e::Engine, p1::Int64, p2::Int64, verbose::Bool)::Bool
-    # TODO: keep function 'default_onfail_ptr'?
+function check(e::Engine, soft_tests::Int64, hard_tests::Int64, verbose::Bool)::Bool
+    # TODO: implement function 'default_onfail_ptr'?
     res = optframe_api1d_engine_check(
         e.hf,
-        Int32(p1),
-        Int32(p2),
+        Int32(soft_tests),
+        Int32(hard_tests),
         Int32(verbose),
         default_onfail_ptr,
     )
