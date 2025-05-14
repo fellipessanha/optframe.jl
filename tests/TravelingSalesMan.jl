@@ -8,12 +8,15 @@ export TSPProblem, TSPSolution
 export parse_trp_file
 export initialize_tsp_problem, generate_random_initial_solution
 export evaluate_solution, callback_deep_copy
-export callback_tostring_tsp, free_tsp_solution
+export callback_tostring_tsp, free_tsp_solution, free_move_swap
 export generate_random_move_swap, apply_move_swap
 export move_can_be_applied_swap, move_is_equal_swap
 export nsseq_swap_iterator_init, nsseq_swap_iterator_first
 export nsseq_swap_iterator_next, nsseq_swap_iterator_current
 export nsseq_swap_iterator_is_done
+export apply_update_move_swap
+export generate_random_move_swap_v2
+export free_move_swap_v2
 
 mutable struct TSPProblem
     engine::OptFrame.Engine
@@ -155,11 +158,6 @@ function callback_tostring_tsp(_::Ptr{Cvoid}, buffer::Ptr{Cchar}, size::Csize_t)
     return sizeof(s)
 end
 
-function free_tsp_solution(s_ptr_void::Ptr{Nothing})::Int32
-    s_ptr = convert(Ptr{TSPSolution}, s_ptr_void)
-    OptFrame.global_unregister(s_ptr)
-    return 0
-end
 
 function generate_random_move_swap(_::TSPProblem, solution::TSPSolution)::MoveSwap
     index_i = rand(1:solution.path_size-2)
@@ -173,6 +171,15 @@ function generate_random_move_swap(problem_void::Ptr{Cvoid}, solution_void::Ptr{
     solution = load_void_into_obj(solution_void, TSPSolution)
     move = generate_random_move_swap(problem, solution)
     move_pointer = OptFrame.global_register(move)
+    return Ptr{Cvoid}(move_pointer)
+end
+
+function generate_random_move_swap_v2(problem_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid})::Ptr{Cvoid}
+    problem = load_void_into_obj(problem_void, TSPProblem)
+    solution = load_void_into_obj(solution_void, TSPSolution)
+    move = generate_random_move_swap(problem, solution)
+    move_pointer = OptFrame.global_register(move)
+    println("generate_random_move_swap_v2=", move_pointer)
     return Ptr{Cvoid}(move_pointer)
 end
 
@@ -199,7 +206,7 @@ function apply_move_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, soluti
     return Ptr{Cvoid}(applied_pointer)
 end
 
-function apply_update_move_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution, e::Float64)::PairMoveDoubleLib
+function apply_update_move_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolution, e::Float64)::OptFrame.PairMoveDoubleLib
     diff = 0.0
     println("apply update i=", move.index_i, " j=", move.index_j)
     n = problem.number_of_cities
@@ -220,10 +227,10 @@ function apply_update_move_swap(_::TSPProblem, move::MoveSwap, solution::TSPSolu
     solution.cities_path[move.index_i], solution.cities_path[move.index_j] =
         solution.cities_path[move.index_j], solution.cities_path[move.index_i]
 
-    return PairMoveDoubleLib(Ptr{Cvoid}(OptFrame.global_register(deepcopy(move))), diff)
+    return OptFrame.PairMoveDoubleLib(Ptr{Cvoid}(OptFrame.global_register(deepcopy(move))), diff)
 end
 
-function apply_update_move_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid}, e::Cdouble)::PairMoveDoubleLib
+function apply_update_move_swap(problem_void::Ptr{Cvoid}, move_void::Ptr{Cvoid}, solution_void::Ptr{Cvoid}, e::Cdouble)::OptFrame.PairMoveDoubleLib
     problem = load_void_into_obj(problem_void, TSPProblem)
     move = load_void_into_obj(move_void, MoveSwap)
     solution = load_void_into_obj(solution_void, TSPSolution)
@@ -336,6 +343,26 @@ function nsseq_swap_iterator_current(problem_void::Ptr{Cvoid}, iterator_void::Pt
     iterator_copy = nsseq_swap_iterator_current(problem, iterator)
     iterator_copy_pointer = OptFrame.global_register(iterator_copy)
     return Ptr{Cvoid}(iterator_copy_pointer)
+end
+
+
+function free_tsp_solution(s_ptr_void::Ptr{Nothing})::Int32
+    s_ptr = convert(Ptr{TSPSolution}, s_ptr_void)
+    OptFrame.global_unregister(s_ptr)
+    return 0
+end
+
+function free_move_swap(m_ptr_void::Ptr{Nothing})::Int32
+    m_ptr = convert(Ptr{MoveSwap}, m_ptr_void)
+    OptFrame.global_unregister(m_ptr)
+    return 0
+end
+
+function free_move_swap_v2(m_ptr_void::Ptr{Nothing})::Int32
+    m_ptr = convert(Ptr{MoveSwap}, m_ptr_void)
+    println("free_move_swap_v2 m_ptr=", m_ptr)
+    OptFrame.global_unregister(m_ptr)
+    return 0
 end
 
 end # modules TravelingSalesman

@@ -45,6 +45,7 @@ initial_solution_pointer = @cfunction(generate_random_initial_solution, Ptr{Cvoi
 deepcopy_callback_pointer = @cfunction(callback_deep_copy, Ptr{Cvoid}, (Ptr{Cvoid},))
 tostring_callback_pointer = @cfunction(callback_tostring_tsp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
 free_tsp_solution_pointer = @cfunction(free_tsp_solution, Cint, (Ptr{Cvoid},))
+free_move_swap_pointer    = @cfunction(free_move_swap, Cint, (Ptr{Cvoid},))
 
 constructive_index = add_constructive(problem.engine, initial_solution_pointer, problem_void, deepcopy_callback_pointer, tostring_callback_pointer, free_tsp_solution_pointer)
 println("created component OptFrame:Constructive ", constructive_index)
@@ -71,8 +72,24 @@ idx_ns = add_ns(
     equals_move_pointer,
     can_be_applied_move_pointer,
     problem_void,
-    free_tsp_solution_pointer
+    free_move_swap_pointer
 )
+
+random_move_pointer_v2 = @cfunction(generate_random_move_swap_v2, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid},))
+apply_update_move_pointer = @cfunction(apply_update_move_swap, OptFrame.PairMoveDoubleLib, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}, Cdouble))
+free_move_swap_pointer_v2    = @cfunction(free_move_swap_v2, Cint, (Ptr{Cvoid},))
+
+idx_ns = add_ns_v2(
+    problem.engine,
+    random_move_pointer_v2,
+    apply_move_pointer,
+    equals_move_pointer,
+    can_be_applied_move_pointer,
+    problem_void,
+    free_move_swap_pointer_v2,
+    apply_update_move_pointer
+)
+
 println("created component OptFrame:NS:FNS ", idx_ns)
 
 iterator_init_ptr = @cfunction(nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
