@@ -9,6 +9,16 @@ export create_initial_search, build_global_search, build_local_search, run_globa
 export experimental_set_parameter
 export add_ns_v2
 
+const libpath = joinpath(@__DIR__, "..", "build", "optframe_lib.so")
+
+const optframe_ptr = Ref{Ptr{Nothing}}()
+
+function __init__()
+    optframe_ptr[] = Libdl.dlopen(libpath)
+
+    return nothing
+end
+
 # global arena, instead of local Engine one
 const _global_gc_arena = IdDict{Ptr{Cvoid},Any}()
 
@@ -18,21 +28,17 @@ mutable struct Engine
     hf::Ptr{Cvoid}
 end
 
-const libpath = joinpath(@__DIR__, "..", "build", "optframe_lib.so")
-
-const optframe_ptr = Libdl.dlopen(libpath)
-
 function get_function_symbol(module_pointer::Ptr{Nothing}, function_name::String)
     return Libdl.dlsym(module_pointer, function_name)
 end
 
 function create_engine_by_symbol(n::Int32)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_create_engine")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_create_engine")
     return @ccall $creation_symbol(n::Cint)::Ptr{Cvoid}
 end
 
 function optframe_api0d_engine_welcome(eng::Ptr{Cvoid})
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api0d_engine_welcome")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api0d_engine_welcome")
     return @ccall $creation_symbol(eng::Ptr{Cvoid})::Cvoid
 end
 
@@ -89,7 +95,7 @@ function global_unregister(ptr::Ptr{T}) where {T}
 end
 
 function optframe_api1d_add_constructive(e_ptr::Ptr{Cvoid}, constructive_callback_ptr, problemCtx::Ptr, deepcopy_callback_ptr, to_string_callback_ptr, decref_callback_ptr)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_constructive")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_add_constructive")
     return @ccall $creation_symbol(
         e_ptr::Ptr{Cvoid},
         constructive_callback_ptr::Ptr{Cvoid},
@@ -109,7 +115,7 @@ function add_constructive(e::Engine, constructive_callback_ptr::Ptr{Nothing}, pr
 end
 
 function optframe_api1d_add_evaluator(e_ptr::Ptr{Cvoid}, ev_callback_ptr::Ptr{Cvoid}, min_or_max::Cint, problemCtx::Ptr{Cvoid})
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_evaluator")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_add_evaluator")
     return @ccall $creation_symbol(
         e_ptr::Ptr{Cvoid},
         ev_callback_ptr::Ptr{Cvoid},
@@ -126,7 +132,7 @@ function add_evaluator(e::Engine, ev_callback_ptr::Ptr{Nothing}, min_or_max::Boo
 end
 
 function optframe_api1d_add_ns(e_ptr::Ptr{Cvoid}, fns_rand, fmove_apply, fmove_eq, fmove_cba, problemCtx::Ptr, decref_callback_ptr)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_ns")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_add_ns")
     return @ccall $creation_symbol(
         e_ptr::Ptr{Cvoid},
         fns_rand::Ptr{Cvoid},
@@ -160,7 +166,7 @@ struct PairMoveDoubleLib
 end
 
 function optframe_api2d_add_ns(e_ptr::Ptr{Cvoid}, fns_rand, fmove_apply, fmove_eq, fmove_cba, problemCtx::Ptr, decref_callback_ptr, fmove_apply_update)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api2d_add_ns")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api2d_add_ns")
     return @ccall $creation_symbol(
         e_ptr::Ptr{Cvoid},
         fns_rand::Ptr{Cvoid},
@@ -192,7 +198,7 @@ end
 
 
 function optframe_api1d_engine_list_components(engine::Ptr{Cvoid}, prefix::Cstring)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_engine_list_components")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_list_components")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, prefix::Cstring)::Cint
 end
 
@@ -206,7 +212,7 @@ function list_engine_components(engine::Engine)
 end
 
 function optframe_api1d_create_component_list(engine::Ptr{Cvoid}, char_list::Cstring, list_type::Cstring)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_create_component_list")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_create_component_list")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, char_list::Cstring, list_type::Cstring)::Cint
 end
 
@@ -218,7 +224,7 @@ function create_component_list(engine::Engine, string_list::String, list_type::S
 end
 
 function optframe_api1d_engine_list_builders(engine::Ptr{Cvoid}, list_type::Cstring)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_engine_list_builders")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_list_builders")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, list_type::Cstring)::Cint
 end
 
@@ -232,7 +238,7 @@ function list_builders(engine::Engine, list_type::String)
 end
 
 function optframe_api1d_create_initial_search(engine::Ptr{Nothing}, evaluator_index::Cint, constructor_index::Cint)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_create_initial_search")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_create_initial_search")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, evaluator_index::Cint, constructor_index::Cint)::Cint
 end
 
@@ -241,7 +247,7 @@ function create_initial_search(engine::Engine, evaluator_index::Int32, construct
 end
 
 function optframe_api1d_build_global(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_global")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_build_global")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)::Cint
 end
 
@@ -257,7 +263,7 @@ function build_global_search(engine::Engine, builder::String, build_string::Stri
 end
 
 function optframe_api1d_build_single(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_single")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_build_single")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)::Cint
 end
 
@@ -273,7 +279,7 @@ function build_single_obj_search(engine::Engine, builder::String, build_string::
 end
 
 function optframe_api1d_build_local_search(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_local_search")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_build_local_search")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring)::Cint
 end
 
@@ -289,7 +295,7 @@ function build_local_search(engine::Engine, builder::String, build_string::Strin
 end
 
 function optframe_api1d_build_component(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring, component_type::Cstring)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_build_component")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_build_component")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, builder::Cstring, build_string::Cstring, component_type::Cstring)::Cint
 end
 
@@ -314,7 +320,7 @@ struct SearchOutput
 end
 
 function optframe_api1d_run_global_search(engine::Ptr{Cvoid}, g_idx::Cint, timelimit::Cdouble)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_run_global_search")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_run_global_search")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, g_idx::Cint, timelimit::Cdouble)::SearchOutput
 end
 
@@ -328,7 +334,7 @@ function run_global_search(engine::Engine, g_idx::Int32, timelimit::Float64)::Se
 end
 
 function optframe_api1d_run_sos_search(engine::Ptr{Cvoid}, g_idx::Cint, timelimit::Cdouble)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_run_sos_search")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_run_sos_search")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, g_idx::Cint, timelimit::Cdouble)::SearchOutput
 end
 
@@ -355,7 +361,7 @@ function optframe_api1d_add_nsseq(
     problemCtx::Ptr,
     decref_callback_ptr
 )
-	creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_add_nsseq")
+	creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_add_nsseq")
 	return @ccall $creation_symbol(
 		engine::Ptr{Cvoid},
 		iterator_random::Ptr{Cvoid},
@@ -404,7 +410,7 @@ end
 
 
 function optframe_api1d_engine_experimental_set_parameter(engine::Ptr{Cvoid}, parameter::Cstring, svalue::Cstring)::Cint
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_engine_experimental_set_parameter")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_experimental_set_parameter")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, parameter::Cstring, svalue::Cstring)::Cint
 end
 
@@ -427,7 +433,7 @@ end
 default_onfail_ptr = @cfunction(onfail, Cint, (Cint,))
 
 function optframe_api1d_engine_check(e_ptr::Ptr{Cvoid}, p1::Cint, p2::Cint, verbose::Cint, onfail_callback_ptr)
-    creation_symbol = get_function_symbol(optframe_ptr, "optframe_api1d_engine_check")
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_check")
     return @ccall $creation_symbol(
         e_ptr::Ptr{Cvoid},
         p1::Cint,
