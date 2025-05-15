@@ -1,6 +1,5 @@
 module OptFrameKnapsack
 
-import Random: randperm # Instead of `Random.shuffle`
 import OptFrame
 
 mutable struct KnapsackProblem
@@ -71,7 +70,7 @@ end
 function random_initial_solution(problem::KnapsackProblem)::KnapsackSolution
     selection = falses(problem.nitems)
     sum = 0.0
-    for i in randperm(problem.nitems)
+    for i in OptFrame.shuffle(problem.engine, 1:problem.nitems)
         if sum + problem.vweights[i] <= problem.capacity
             selection[i] = true
             sum += problem.vweights[i]

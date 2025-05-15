@@ -1,6 +1,5 @@
 module OptFrameTSP
 
-import Random: randperm # instead of `Random.shuffle`
 import OptFrame
 
 include("Utils.jl")
@@ -55,7 +54,8 @@ function initialize_tsp_problem(
 end
 
 function generate_random_initial_solution(problem::TSPProblem)::TSPSolution
-    return TSPSolution(problem.number_of_cities, randperm(problem.number_of_cities))
+    initial_solution = OptFrame.shuffle(problem.engine, 1:problem.number_of_cities)
+    return TSPSolution(problem.number_of_cities, initial_solution)
 end
 
 function generate_random_initial_solution(problem_ptr::Ptr{TSPProblem})::Ptr{TSPSolution}

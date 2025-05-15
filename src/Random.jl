@@ -34,6 +34,19 @@ function get_random(engine::Engine, floor::T, ceiling::T)::T where T<:Integer
     return optframe_api1d_engine_rand_n_n(engine.hf, Cint(floor), Cint(ceiling))
 end
 
+function shuffle(engine::Engine, v::Vector{T})::Vector{T} where T
+    n = length(v)
+    for i = 1:n
+        j = get_random(engine, i, n)
+        v[i], v[j] = v[j], v[i]
+    end
+    return v
+end
+
+function shuffle(engine::Engine, range::UnitRange{T})::Vector{T} where T<:Integer
+    return shuffle(engine, collect(range))
+end
+
 
 
 
