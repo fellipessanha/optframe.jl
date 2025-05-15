@@ -15,7 +15,7 @@ end
 
 function optframe_api1d_engine_rand_set_seed(eng::Ptr{Cvoid}, seed::Cuint)::Cvoid
     creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_rand_set_seed")
-    return @ccall $creation_symbol(eng::Ptr{Cvoid}, seed::Cuint)::Cint
+    @ccall $creation_symbol(eng::Ptr{Cvoid}, seed::Cuint)::Cvoid
 end
 
 function set_random_seed(engine::Engine, seed::UInt32)::Nothing
