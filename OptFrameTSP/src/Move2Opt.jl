@@ -18,7 +18,7 @@ function generate_random_move_2opt(
     return Ptr{Cvoid}(move_pointer)
 end
 
-function apply_move_2opt(_::TSPProblem, move::Move2Opt, solution::TSPSolution)::MoveSwap
+function apply_move_2opt(_::TSPProblem, move::Move2Opt, solution::TSPSolution)::Move2Opt
     solution.cities_path[move.index_i], solution.cities_path[move.index_j] =
         solution.cities_path[move.index_j], solution.cities_path[move.index_i]
     return deepcopy(move)
@@ -79,7 +79,7 @@ function apply_update_move_2opt(
     return pair_md
 end
 
-function move_is_equal_2opt(_::TSPProblem, move_a::Move2Opt, move_b::MoveSwap)::Bool
+function move_is_equal_2opt(_::TSPProblem, move_a::Move2Opt, move_b::Move2Opt)::Bool
     move_a_idxs = (move_a.index_i, move_a.index_j)
     return move_b.index_i in move_a_idxs && move_b.index_j in move_a_idxs
 end
@@ -151,7 +151,7 @@ function nsseq_2opt_iterator_first(
     return void_return
 end
 
-function nsseq_2opt_iterator_next(problem::TSPProblem, iterator::Move2Opt)::MoveSwap
+function nsseq_2opt_iterator_next(problem::TSPProblem, iterator::Move2Opt)::Move2Opt
     if iterator.index_j == problem.number_of_cities
         iterator.index_i += 1
         iterator.index_j = iterator.index_i + 1
@@ -164,12 +164,10 @@ end
 
 function nsseq_2opt_iterator_next(problem_void::Ptr{Cvoid}, iterator_void::Ptr{Cvoid})::Cint
     problem = load_void_into_obj(problem_void, TSPProblem)
-    # iterator::Move2Opt = load_void_into_obj(iterator_void, MoveSwap)
     it = convert(Ptr{Move2Opt}, iterator_void)
     iterator = unsafe_load(it)
     iterator = nsseq_2opt_iterator_next(problem, iterator)
     unsafe_store!(it, iterator)
-    #return iterator.index_i
     return Int32(0)
 end
 
