@@ -121,7 +121,12 @@ function free_tsp_solution(s_ptr_void::Ptr{Nothing})::Int32
     return 0
 end
 
-function build_global_search_simulated_annealing(problem, id_evaluator::Integer, id_initial_search::Integer, id_ns::Integer)::Integer
+function build_global_search_simulated_annealing(
+    problem::TSPProblem,
+    id_evaluator::Integer,
+    id_initial_search::Integer,
+    id_ns::Integer,
+)::Integer
     OptFrame.build_global_search(
         problem.engine,
         "OptFrame:ComponentBuilder:GlobalSearch:SA:BasicSA",
@@ -129,12 +134,68 @@ function build_global_search_simulated_annealing(problem, id_evaluator::Integer,
     )
 end
 
-function build_local_search(problem, id_evaluator::Integer, id_nsseq::Integer, is_best_improvement::Bool)::Integer
+function build_local_search(
+    problem::TSPProblem,
+    id_evaluator::Integer,
+    id_nsseq::Integer,
+    is_best_improvement::Bool,
+)::Integer
     improvement_strategy = is_best_improvement ? "BI" : "FI"
     ls_idx = OptFrame.build_local_search(
         problem.engine,
         "OptFrame:ComponentBuilder:LocalSearch:$improvement_strategy",
         "OptFrame:GeneralEvaluator:Evaluator $id_evaluator  OptFrame:NS:NSFind:NSSeq $id_nsseq",
+    )
+end
+
+
+function build_vnd_local_search(
+    problem::TSPProblem,
+    evaluator_index::Integer,
+    local_search_list_index::Integer,
+)::Integer
+    return OptFrame.build_component(
+        problem.engine,
+        "OptFrame:ComponentBuilder:LocalSearch:VND",
+        "OptFrame:GeneralEvaluator:Evaluator $evaluator_index  OptFrame:LocalSearch[] $local_search_list_index",
+        "OptFrame:LocalSearch:VND",
+    )
+end
+
+function build_ils_basic_perturbation(
+    problem::TSPProblem,
+    evaluator_index::Integer,
+    ns_list_index::Integer,
+    min_iterations,
+    max_iterations,
+)::Integer
+    return OptFrame.build_component(
+        problem.engine,
+        "OptFrame:ComponentBuilder:ILS:basic_pert",
+        "OptFrame:GeneralEvaluator:Evaluator $evaluator_index " *
+        "$max_iterations $min_iterations" *
+        "OptFrame:NS[] $ns_list_index",
+        "OptFrame:ILS:basic_pert",
+    )
+end
+
+
+function build_ils_single_obj_search(
+    problem::TSPProblem,
+    evaluator_index::Integer,
+    initial_search_index::Integer,
+    local_search_list_index::Integer,
+    ils_perturbation_index::Integer,
+    max_iterations::Integer,
+)::Integer
+    return OptFrame.build_single_obj_search(
+        problem.engine,
+        "OptFrame:ComponentBuilder:SingleObjSearch:ILS:BasicILS",
+        "OptFrame:GeneralEvaluator:Evaluator $evaluator_index " *
+        "OptFrame:InitialSearch $initial_search_index " *
+        "OptFrame:LocalSearch $local_search_list_index " *
+        "OptFrame:ILS:LevelPert $ils_perturbation_index" *
+        "$max_iterations",
     )
 end
 

@@ -7,13 +7,13 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     problem = TSP.initialize_tsp_problem(cities, x_coordinates, y_coordinates)
 
+    OptFrame.list_builders(problem.engine, "OptFrame:SingleObjSearch")
+
     b2 = OptFrame.experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "-1")
 
     @show b2
 
     # Verbosity filter 4 is disabled. Filter -1 is debug.
-
-    #println(problem)
 
     problem_ptr  = Ptr{TSP.TSPProblem}(pointer_from_objref(problem))
     problem_void = Ptr{Cvoid}(problem_ptr)
@@ -150,16 +150,70 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     )
     @info("added nsseq with idx = $nsseq_idx_2opt")
 
-    component_list_swap = OptFrame.create_component_list(problem.engine, "[OptFrame:NS $idx_ns_swap]", "OptFrame:NS[]")
-    component_list_2opt = OptFrame.create_component_list(problem.engine, "[OptFrame:NS $idx_ns_2opt]", "OptFrame:NS[]")
-    component_list      = OptFrame.create_component_list(problem.engine, "[OptFrame:NS $idx_ns_swap, OptFrame:NS $idx_ns_2opt]", "OptFrame:NS[]")
+    component_list_swap = OptFrame.create_component_list(
+        problem.engine,
+        "[OptFrame:NS $idx_ns_swap]",
+        "OptFrame:NS[]",
+    )
+    component_list_2opt = OptFrame.create_component_list(
+        problem.engine,
+        "[OptFrame:NS $idx_ns_2opt]",
+        "OptFrame:NS[]",
+    )
 
-    simulated_annealing_idx = TSP.build_global_search_simulated_annealing(problem, evaluator_index, initial_search_index, idx_ns_swap)
+    nsseq_component_list = OptFrame.create_component_list(
+        problem.engine,
+        "[OptFrame:NS $nsseq_idx_swap, OptFrame:NS $nsseq_idx_2opt]",
+        "OptFrame:NS[]",
+    )
 
-    local_search_idx = TSP.build_local_search(problem, evaluator_index, nsseq_idx_swap, false)
-    @info("created component OptFrame:LocalSearch $local_search_idx")
 
-    OptFrame.list_engine_components(problem.engine)
+    @info("created ns component lists $component_list_swap and $component_list_2opt")
+    @info("created nsseq component list $nsseq_component_list")
+
+    simulated_annealing_idx = TSP.build_global_search_simulated_annealing(
+        problem,
+        evaluator_index,
+        initial_search_index,
+        idx_ns_swap,
+    )
+
+    local_search_swap = TSP.build_local_search(problem, evaluator_index, idx_ns_swap, false)
+    local_search_2opt = TSP.build_local_search(problem, evaluator_index, idx_ns_2opt, false)
+
+    local_search_list = OptFrame.create_component_list(
+        problem.engine,
+        "[OptFrame:LocalSearch $local_search_2opt, OptFrame:LocalSearch $local_search_swap]",
+        "OptFrame:LocalSearch[]",
+    )
+
+    @info("created component OptFrame:LocalSearch[] $local_search_list")
+
+
+    vnd_idx = TSP.build_vnd_local_search(problem, evaluator_index, local_search_list)
+    @info("created component OptFrame:LocalSearch:VND $vnd_idx")
+
+    ils_perturbation_idx = TSP.build_ils_basic_perturbation(
+        problem,
+        evaluator_index,
+        3,
+        12,
+        component_list_swap,
+    )
+    @info("created component OptFrame:ILS:LevelPert $ils_perturbation_idx")
+
+    ils_idx = TSP.build_ils_single_obj_search(
+        problem,
+        evaluator_index,
+        initial_search_index,
+        vnd_idx,
+        ils_perturbation_idx,
+        40,
+    )
+
+    @info("created component OptFrame:ILS $ils_idx")
+
+    # lout = OptFrame.run_single_obj_search(problem.engine, ils_idx, 4.5)
 
     @info("try check (with disabled prints)")
 
