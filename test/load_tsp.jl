@@ -68,52 +68,90 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("created component OptFrame:InitialSearch $initial_search_index")
 
     swap_move = TSP.generate_random_move_swap(problem, solution)
+    swap_move = TSP.generate_random_move_2opt(problem, solution)
 
     @info("""
           generated swap move: $swap_move
-          pre-swap solution: $solution
-          post-swap solution: $solution
+          generated 2opt move: $swap_move
           """)
 
-    random_move_pointer         = @cfunction(TSP.generate_random_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
-    apply_move_pointer          = @cfunction(TSP.apply_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
-    equals_move_pointer         = @cfunction(TSP.move_is_equal_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
-    can_be_applied_move_pointer = @cfunction(TSP.move_can_be_applied_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
+    random_move_pointer_swap         = @cfunction(TSP.generate_random_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+    apply_move_pointer_swap          = @cfunction(TSP.apply_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
+    equals_move_pointer_swap         = @cfunction(TSP.move_is_equal_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
+    can_be_applied_move_pointer_swap = @cfunction(TSP.move_can_be_applied_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
 
-    idx_ns = OptFrame.add_ns(
+    idx_ns_swap = OptFrame.add_ns(
         problem.engine,
-        random_move_pointer,
-        apply_move_pointer,
-        equals_move_pointer,
-        can_be_applied_move_pointer,
+        random_move_pointer_swap,
+        apply_move_pointer_swap,
+        equals_move_pointer_swap,
+        can_be_applied_move_pointer_swap,
         problem_void,
         free_tsp_solution_pointer,
     )
 
-    @info("created component OptFrame:NS:FNS $idx_ns")
+    random_move_pointer_2opt         = @cfunction(TSP.generate_random_move_2opt, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+    apply_move_pointer_2opt          = @cfunction(TSP.apply_move_2opt, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
+    equals_move_pointer_2opt         = @cfunction(TSP.move_is_equal_2opt, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
+    can_be_applied_move_pointer_2opt = @cfunction(TSP.move_can_be_applied_2opt, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
 
-    iterator_init_ptr    = @cfunction(TSP.nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
-    iterator_first_ptr   = @cfunction(TSP.nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
-    iterator_next_ptr    = @cfunction(TSP.nsseq_swap_iterator_next, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
-    iterator_is_done_ptr = @cfunction(TSP.nsseq_swap_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
-    iterator_current_ptr = @cfunction(TSP.nsseq_swap_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+    idx_ns_2opt = OptFrame.add_ns(
+        problem.engine,
+        random_move_pointer_2opt,
+        apply_move_pointer_2opt,
+        equals_move_pointer_2opt,
+        can_be_applied_move_pointer_2opt,
+        problem_void,
+        free_tsp_solution_pointer,
+    )
 
-    nsseq_idx = OptFrame.add_nsseq(
+    @info("created component OptFrame:NS:FNS $idx_ns_swap")
+    @info("created component OptFrame:NS:FNS $idx_ns_2opt")
+
+    iterator_init_ptr_swap    = @cfunction(TSP.nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+    iterator_first_ptr_swap   = @cfunction(TSP.nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+    iterator_next_ptr_swap    = @cfunction(TSP.nsseq_swap_iterator_next, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+    iterator_is_done_ptr_swap = @cfunction(TSP.nsseq_swap_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+    iterator_current_ptr_swap = @cfunction(TSP.nsseq_swap_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+
+    nsseq_idx_swap = OptFrame.add_nsseq(
         problem.engine,
         initial_solution_pointer,
-        iterator_init_ptr,
-        iterator_first_ptr,
-        iterator_next_ptr,
-        iterator_is_done_ptr,
-        iterator_current_ptr,
-        apply_move_pointer,
-        equals_move_pointer,
-        can_be_applied_move_pointer,
+        iterator_init_ptr_swap,
+        iterator_first_ptr_swap,
+        iterator_next_ptr_swap,
+        iterator_is_done_ptr_swap,
+        iterator_current_ptr_swap,
+        apply_move_pointer_swap,
+        equals_move_pointer_swap,
+        can_be_applied_move_pointer_swap,
         problem_void,
         free_tsp_solution_pointer,
     )
 
-    @info("added nsseq with idx = $nsseq_idx")
+    iterator_init_ptr_2opt    = @cfunction(TSP.nsseq_2opt_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+    iterator_first_ptr_2opt   = @cfunction(TSP.nsseq_2opt_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+    iterator_next_ptr_2opt    = @cfunction(TSP.nsseq_2opt_iterator_next, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+    iterator_is_done_ptr_2opt = @cfunction(TSP.nsseq_2opt_iterator_is_done, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
+    iterator_current_ptr_2opt = @cfunction(TSP.nsseq_2opt_iterator_current, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
+
+    nsseq_idx_2opt = OptFrame.add_nsseq(
+        problem.engine,
+        initial_solution_pointer,
+        iterator_init_ptr_2opt,
+        iterator_first_ptr_2opt,
+        iterator_next_ptr_2opt,
+        iterator_is_done_ptr_2opt,
+        iterator_current_ptr_2opt,
+        apply_move_pointer_2opt,
+        equals_move_pointer_2opt,
+        can_be_applied_move_pointer_2opt,
+        problem_void,
+        free_tsp_solution_pointer,
+    )
+
+    @info("added nsseq with idx = $nsseq_idx_swap")
+    @info("added nsseq with idx = $nsseq_idx_2opt")
 
     @info("try check (with disabled prints)")
 
