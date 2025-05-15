@@ -8,7 +8,8 @@ build/optframe_lib.so:
 	mv thirdparty/optframe-external/build/*.so build/
 	ln -s build/optframe_lib.so test/
 
-test: build/optframe_lib.so test_init test_kp test_tsp
+test: build/optframe_lib.so
+	julia --project -e 'import Pkg; Pkg.test()'
 
 instantiate:
 	julia --proj=.                  -e 'import Pkg; Pkg.instantiate()'
@@ -16,19 +17,6 @@ instantiate:
 	julia --proj=./OptFrameKnapsack -e 'import Pkg; Pkg.develop(; path = "."); Pkg.instantiate()'
 	
 	julia --proj=./test -e 'import Pkg; Pkg.develop([Pkg.PackageSpec(; path = "./OptFrameTSP"), Pkg.PackageSpec(; path = "./OptFrameKnapsack")]); Pkg.instantiate();'
-
-test_init:
-	echo "test Load Optframe"
-	cd tests && julia LoadOptFrame.jl
-
-test_kp: build/optframe_lib.so
-	echo "Test kp"
-	cd tests && julia LoadKP.jl
-
-test_tsp:
-	echo "Test tsp"
-	cd tests && julia loadTSP.jl
-
 
 clean:
 	rm -f build/optframe_lib.so
