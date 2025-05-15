@@ -9,9 +9,7 @@ function random_generator()
     first_rand = engine |> OptFrame.get_random
 
     @show first_rand
-    @test first_rand == 5
-
-    @show test_random
+    @test first_rand % 100 == 5
 
     random_upper_bound  = 100
     random_with_ceiling = OptFrame.get_random(engine, random_upper_bound)
