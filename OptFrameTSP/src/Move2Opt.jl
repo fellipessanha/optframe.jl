@@ -139,7 +139,6 @@ function nsseq_2opt_iterator_first(
     problem_void::Ptr{Cvoid},
     iterator_void::Ptr{Cvoid},
 )::Cint
-    #println("begin nsseq_2opt_iterator_first()")
     p = convert(Ptr{TSPProblem}, problem_void)
     problem = unsafe_load(p)
     void_return = Int32(0)
@@ -147,7 +146,6 @@ function nsseq_2opt_iterator_first(
     it2 = unsafe_pointer_to_objref(it)
     it2.index_i = 1
     it2.index_j = 3
-    #println("end nsseq_2opt_iterator_first")
     return void_return
 end
 
@@ -180,12 +178,10 @@ function nsseq_2opt_iterator_is_done(
     problem_void::Ptr{Cvoid},
     iterator_void::Ptr{Cvoid},
 )::Cint
-    #println("begin nsseq_2opt_iterator_is_done()")
     problem_ptr = convert(Ptr{TSPProblem}, problem_void)
     problem = unsafe_load(problem_ptr)
     iterator_ptr = convert(Ptr{Move2Opt}, iterator_void)
     iterator = unsafe_load(iterator_ptr)
-    #println("end nsseq_2opt_iterator_is_done")
     return Int32(nsseq_2opt_iterator_is_done(problem, iterator))
 end
 
@@ -197,7 +193,6 @@ function nsseq_2opt_iterator_current(
     problem_void::Ptr{Cvoid},
     iterator_void::Ptr{Cvoid},
 )::Ptr{Cvoid}
-    #println("begin nsseq_2opt_iterator_current")
     problem = load_void_into_obj(problem_void, TSPProblem)
     iterator = load_void_into_obj(iterator_void, Move2Opt)
     iterator_copy = nsseq_2opt_iterator_current(problem, iterator)

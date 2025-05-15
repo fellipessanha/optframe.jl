@@ -1,5 +1,3 @@
-using Base: unsafe_load_commands
-
 function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.txt"))
     x_coordinates, y_coordinates = TSP.parse_trp_file(path)
 
