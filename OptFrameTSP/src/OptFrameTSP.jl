@@ -107,7 +107,6 @@ function evaluate_solution(problem_ptr::Ptr{Cvoid}, solution_ptr::Ptr{Cvoid})::F
     return evaluate_solution(problem, solution)
 end
 
-
 function callback_tostring_tsp(_::Ptr{Cvoid}, buffer::Ptr{Cchar}, size::Csize_t)::Csize_t
     s = "solution as string"
     n = min(sizeof(s), size - 1)
@@ -120,6 +119,23 @@ function free_tsp_solution(s_ptr_void::Ptr{Nothing})::Int32
     s_ptr = convert(Ptr{TSPSolution}, s_ptr_void)
     OptFrame.global_unregister(s_ptr)
     return 0
+end
+
+function build_global_search_simulated_annealing(problem, id_evaluator::Integer, id_initial_search::Integer, id_ns::Integer)::Integer
+    OptFrame.build_global_search(
+        problem.engine,
+        "OptFrame:ComponentBuilder:GlobalSearch:SA:BasicSA",
+        "OptFrame:GeneralEvaluator:Evaluator $id_evaluator OptFrame:InitialSearch $id_initial_search OptFrame:NS[] $id_ns 0.99 100 999",
+    )
+end
+
+function build_local_search(problem, id_evaluator::Integer, id_nsseq::Integer, is_best_improvement::Bool)::Integer
+    improvement_strategy = is_best_improvement ? "BI" : "FI"
+    ls_idx = OptFrame.build_local_search(
+        problem.engine,
+        "OptFrame:ComponentBuilder:LocalSearch:$improvement_strategy",
+        "OptFrame:GeneralEvaluator:Evaluator $id_evaluator  OptFrame:NS:NSFind:NSSeq $id_nsseq",
+    )
 end
 
 end # module TSP

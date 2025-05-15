@@ -126,6 +126,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         problem_void,
         free_tsp_solution_pointer,
     )
+    @info("added nsseq with idx = $nsseq_idx_swap")
 
     iterator_init_ptr_2opt    = @cfunction(TSP.nsseq_2opt_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
     iterator_first_ptr_2opt   = @cfunction(TSP.nsseq_2opt_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
@@ -147,9 +148,18 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         problem_void,
         free_tsp_solution_pointer,
     )
-
-    @info("added nsseq with idx = $nsseq_idx_swap")
     @info("added nsseq with idx = $nsseq_idx_2opt")
+
+    component_list_swap = OptFrame.create_component_list(problem.engine, "[OptFrame:NS $idx_ns_swap]", "OptFrame:NS[]")
+    component_list_2opt = OptFrame.create_component_list(problem.engine, "[OptFrame:NS $idx_ns_2opt]", "OptFrame:NS[]")
+    component_list      = OptFrame.create_component_list(problem.engine, "[OptFrame:NS $idx_ns_swap, OptFrame:NS $idx_ns_2opt]", "OptFrame:NS[]")
+
+    simulated_annealing_idx = TSP.build_global_search_simulated_annealing(problem, evaluator_index, initial_search_index, idx_ns_swap)
+
+    local_search_idx = TSP.build_local_search(problem, evaluator_index, nsseq_idx_swap, false)
+    @info("created component OptFrame:LocalSearch $local_search_idx")
+
+    OptFrame.list_engine_components(problem.engine)
 
     @info("try check (with disabled prints)")
 
