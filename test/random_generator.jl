@@ -3,7 +3,13 @@ function random_generator()
     @info("testing OptFrame random generator")
     engine = OptFrame.init_engine(4)
 
-    test_random = engine |> OptFrame.get_random
+    @show UInt32(9999)
+    OptFrame.set_random_seed(engine, UInt32(9999))
+    
+    first_rand = engine |> OptFrame.get_random
+
+    @show first_rand
+    @test first_rand == 5
 
     @show test_random
 

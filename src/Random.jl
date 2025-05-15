@@ -13,13 +13,13 @@ function optframe_api1d_engine_rand_n_n(eng::Ptr{Cvoid}, floor::Cint, ceiling::C
     return @ccall $creation_symbol(eng::Ptr{Cvoid}, floor::Cint, ceiling::Cint)::Cint
 end
 
-function optframe_api1d_engine_rand_set_seed(eng::Ptr{Cvoid}, seed::Cint)::Cvoid
+function optframe_api1d_engine_rand_set_seed(eng::Ptr{Cvoid}, seed::Cuint)::Cvoid
     creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_rand_set_seed")
-    return @ccall $creation_symbol(eng::Ptr{Cvoid}, seed::Cint)::Cint
+    return @ccall $creation_symbol(eng::Ptr{Cvoid}, seed::Cuint)::Cint
 end
 
-function set_random_seed(engine::Engine, seed::Cint)::Nothing
-    optframe_api1d_engine_rand_set_seed(engine.hf, Cint(seed))
+function set_random_seed(engine::Engine, seed::UInt32)::Nothing
+    optframe_api1d_engine_rand_set_seed(engine.hf, Cuint(seed))
 end
 
 function get_random(engine::Engine)::Cint
