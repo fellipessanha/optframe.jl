@@ -1,0 +1,39 @@
+function optframe_api1d_engine_rand(eng::Ptr{Cvoid})::Cint
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_rand")
+    return @ccall $creation_symbol(eng::Ptr{Cvoid})::Cint
+end
+
+function optframe_api1d_engine_rand_n(eng::Ptr{Cvoid}, ceiling::Cint)::Cint
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_rand_n")
+    return @ccall $creation_symbol(eng::Ptr{Cvoid}, ceiling::Cint)::Cint
+end
+
+function optframe_api1d_engine_rand_n_n(eng::Ptr{Cvoid}, floor::Cint, ceiling::Cint)::Cint
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_rand_n_n")
+    return @ccall $creation_symbol(eng::Ptr{Cvoid}, floor::Cint, ceiling::Cint)::Cint
+end
+
+function optframe_api1d_engine_rand_set_seed(eng::Ptr{Cvoid}, seed::Cint)::Cvoid
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_rand_set_seed")
+    return @ccall $creation_symbol(eng::Ptr{Cvoid}, seed::Cint)::Cint
+end
+
+function set_random_seed(engine::Engine, seed::Cint)::Nothing
+    optframe_api1d_engine_rand_set_seed(engine.hf, Cint(seed))
+end
+
+function get_random(engine::Engine)::Cint
+    return optframe_api1d_engine_rand(engine.hf)
+end
+
+function get_random(engine::Engine, ceiling::T)::T where T<:Integer
+    return optframe_api1d_engine_rand_n(engine.hf, Cint(ceiling))
+end
+
+function get_random(engine::Engine, floor::T, ceiling::T)::T where T<:Integer
+    return optframe_api1d_engine_rand_n_n(engine.hf, Cint(floor), Cint(ceiling))
+end
+
+
+
+

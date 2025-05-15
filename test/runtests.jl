@@ -7,11 +7,16 @@ import OptFrameKnapsack as KP
 include("load_optframe.jl")
 include("load_tsp.jl")
 include("load_kp.jl")
+include("random_generator.jl")
 
 function main()
     @testset "OptFrame.jl Test Suite" verbose = true begin
         @testset "■ Load OptFrame" verbose = true begin
             load_optframe()
+        end
+
+        @testset "■ Random Number Generator" verbose = true begin
+            random_generator()
         end
 
         @testset "▶ TSP" verbose = true begin

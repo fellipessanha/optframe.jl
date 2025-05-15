@@ -30,6 +30,8 @@ mutable struct Engine
     hf::Ptr{Cvoid}
 end
 
+include("Random.jl")
+
 function get_function_symbol(module_pointer::Ptr{Nothing}, function_name::String)
     return Libdl.dlsym(module_pointer, function_name)
 end
