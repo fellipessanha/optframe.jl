@@ -131,18 +131,6 @@ function free_move_kp(m_ptr_void::Ptr{Nothing})::Int32
     return 0
 end
 
-# function random_initial_solution(problem::KnapsackProblem)::KnapsackSolution
-#     selection = falses(problem.nitems)
-#     sum = 0.0
-#     for i in randperm(problem.nitems)
-#         if sum + problem.vweights[i] <= problem.capacity
-#             selection[i] = true
-#             sum += problem.vweights[i]
-#         end
-#     end
-#     return KnapsackSolution(selection)
-# end
-
 function ns_rand_bitflip(problem::KnapsackProblem, solution::KnapsackSolution)::MoveBitFlip
     k = rand(1:problem.nitems)
     mv = MoveBitFlip(Int32(k))
