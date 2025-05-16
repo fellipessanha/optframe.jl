@@ -172,14 +172,14 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("created ns component list $ns_component_list")
 
     simulated_annealing_idx = TSP.build_global_search_simulated_annealing(
-        problem,
+        problem.engine,
         evaluator_index,
         initial_search_index,
         idx_ns_swap,
     )
 
-    local_search_swap = TSP.build_local_search(problem, evaluator_index, idx_ns_swap, false)
-    local_search_2opt = TSP.build_local_search(problem, evaluator_index, idx_ns_2opt, false)
+    local_search_swap = TSP.build_local_search(problem.engine, evaluator_index, idx_ns_swap, false)
+    local_search_2opt = TSP.build_local_search(problem.engine, evaluator_index, idx_ns_2opt, false)
 
     local_search_list = OptFrame.create_component_list(
         problem.engine,
@@ -189,15 +189,15 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     @info("created component OptFrame:LocalSearch[] $local_search_list")
 
-    vnd_idx = TSP.build_vnd_local_search(problem, evaluator_index, local_search_list)
+    vnd_idx = TSP.build_vnd_local_search(problem.engine, evaluator_index, local_search_list)
     @info("created component OptFrame:LocalSearch:VND $vnd_idx")
 
-    ils_perturbation_idx = TSP.build_ils_basic_perturbation(problem, evaluator_index, 3, 12, component_list_swap)
+    ils_perturbation_idx = TSP.build_ils_basic_perturbation(problem.engine, evaluator_index, 3, 12, component_list_swap)
     @info("created component OptFrame:ILS:basic_pert $ils_perturbation_idx")
 
 
     ils_idx = TSP.build_ils_single_obj_search(
-        problem,
+        problem.engine,
         evaluator_index,
         initial_search_index,
         vnd_idx,
