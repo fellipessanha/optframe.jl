@@ -8,7 +8,7 @@ build/optframe_lib.so:
 	mv thirdparty/optframe-external/build/*.so build/
 	ln -s build/optframe_lib.so test/
 
-test: build/optframe_lib.so
+test_lib: build/optframe_lib.so
 	julia --project -e 'import Pkg; Pkg.test()'
 
 instantiate:
