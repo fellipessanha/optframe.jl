@@ -1,3 +1,5 @@
+import OptFrameTSP as TSP
+
 function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.txt"))
     x_coordinates, y_coordinates = TSP.parse_trp_file(path)
 
@@ -178,8 +180,10 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         idx_ns_swap,
     )
 
-    local_search_swap = TSP.build_local_search(problem.engine, evaluator_index, idx_ns_swap, false)
-    local_search_2opt = TSP.build_local_search(problem.engine, evaluator_index, idx_ns_2opt, false)
+    local_search_swap =
+        TSP.build_local_search(problem.engine, evaluator_index, idx_ns_swap, false)
+    local_search_2opt =
+        TSP.build_local_search(problem.engine, evaluator_index, idx_ns_2opt, false)
 
     local_search_list = OptFrame.create_component_list(
         problem.engine,
@@ -192,7 +196,13 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     vnd_idx = TSP.build_vnd_local_search(problem.engine, evaluator_index, local_search_list)
     @info("created component OptFrame:LocalSearch:VND $vnd_idx")
 
-    ils_perturbation_idx = TSP.build_ils_basic_perturbation(problem.engine, evaluator_index, 3, 12, idx_ns_swap)
+    ils_perturbation_idx = TSP.build_ils_basic_perturbation(
+        problem.engine,
+        evaluator_index,
+        3,
+        12,
+        idx_ns_swap,
+    )
     @info("created component OptFrame:ILS:basic_pert $ils_perturbation_idx")
 
 
@@ -202,7 +212,8 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         initial_search_index,
         vnd_idx,
         ils_perturbation_idx,
-        Int32(40), Int32(10)
+        Int32(40),
+        Int32(10),
     )
 
     @info("created component OptFrame:ILS $ils_idx")
@@ -215,7 +226,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     @info("try check (with disabled prints)")
 
-    # @test OptFrame.check(problem.engine, 300, 5, false)
+    @test OptFrame.check(problem.engine, 100, 5, false)
 
     return nothing
 end

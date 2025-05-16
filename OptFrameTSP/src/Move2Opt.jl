@@ -19,8 +19,7 @@ function generate_random_move_2opt(
 end
 
 function apply_move_2opt(_::TSPProblem, move::Move2Opt, solution::TSPSolution)::Move2Opt
-    solution.cities_path[move.index_i], solution.cities_path[move.index_j] =
-        solution.cities_path[move.index_j], solution.cities_path[move.index_i]
+    solution.cities_path = reverse(solution.cities_path, move.index_i, move.index_j)
     return deepcopy(move)
 end
 

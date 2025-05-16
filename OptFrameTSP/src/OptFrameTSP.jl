@@ -194,7 +194,7 @@ function build_ils_single_obj_search(
         "OptFrame:GeneralEvaluator:Evaluator $evaluator_index " *
         "OptFrame:InitialSearch $initial_search_index " *
         "OptFrame:LocalSearch $local_search_index " *
-        "OptFrame:ILS:LevelPert $ils_perturbation_index" *
+        "OptFrame:ILS:LevelPert $ils_perturbation_index " *
         "$max_iterations $max_perturbation_level",
     )
 end
