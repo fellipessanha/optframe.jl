@@ -171,11 +171,10 @@ function build_ils_basic_perturbation(
 )::Integer
     return OptFrame.build_component(
         engine,
-        "OptFrame:ComponentBuilder:ILS:basic_pert",
+        "OptFrame:ComponentBuilder:ILS:LevelPert:LPlus2",
         "OptFrame:GeneralEvaluator:Evaluator $evaluator_index  " *
-        "$min_iterations  $max_iterations  " *
-        "OptFrame:NS[] $ns_list_index",
-        "OptFrame:ILS:basic_pert",
+        "OptFrame:NS $ns_list_index",
+        "OptFrame:ILS:LevelPert",
     )
 end
 
@@ -184,20 +183,20 @@ function build_ils_single_obj_search(
     engine::OptFrame.Engine,
     evaluator_index::Integer,
     initial_search_index::Integer,
-    local_search_list_index::Integer,
+    local_search_index::Integer,
     ils_perturbation_index::Integer,
     max_iterations::Integer,
+    max_perturbation_level::Integer,
 )::Integer
     return OptFrame.build_single_obj_search(
         engine,
-        "OptFrame:ComponentBuilder:SingleObjSearch:ILS:BasicILS",
+        "OptFrame:ComponentBuilder:SingleObjSearch:ILS:ILSLevels",
         "OptFrame:GeneralEvaluator:Evaluator $evaluator_index " *
         "OptFrame:InitialSearch $initial_search_index " *
-        "OptFrame:LocalSearch $local_search_list_index " *
-        "OptFrame:ILS:basic_pert $ils_perturbation_index" *
-        "$max_iterations",
+        "OptFrame:LocalSearch $local_search_index " *
+        "OptFrame:ILS:LevelPert $ils_perturbation_index" *
+        "$max_iterations $max_perturbation_level",
     )
 end
 
 end # module TSP
-

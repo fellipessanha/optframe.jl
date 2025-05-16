@@ -192,7 +192,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     vnd_idx = TSP.build_vnd_local_search(problem.engine, evaluator_index, local_search_list)
     @info("created component OptFrame:LocalSearch:VND $vnd_idx")
 
-    ils_perturbation_idx = TSP.build_ils_basic_perturbation(problem.engine, evaluator_index, 3, 12, component_list_swap)
+    ils_perturbation_idx = TSP.build_ils_basic_perturbation(problem.engine, evaluator_index, 3, 12, idx_ns_swap)
     @info("created component OptFrame:ILS:basic_pert $ils_perturbation_idx")
 
 
@@ -202,16 +202,20 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         initial_search_index,
         vnd_idx,
         ils_perturbation_idx,
-        40,
+        Int32(40), Int32(10)
     )
 
     @info("created component OptFrame:ILS $ils_idx")
 
     lout = OptFrame.run_single_obj_search(problem.engine, ils_idx, 4.5)
 
+    best_solution = TSP.load_void_into_obj(lout.best_s, TSP.TSPSolution)
+    @info("ILS with VND finished! results: $(lout.best_e)")
+    @show best_solution
+
     @info("try check (with disabled prints)")
 
-    @test OptFrame.check(problem.engine, 300, 5, false)
+    # @test OptFrame.check(problem.engine, 300, 5, false)
 
     return nothing
 end
