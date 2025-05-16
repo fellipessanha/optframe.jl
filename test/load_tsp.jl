@@ -114,7 +114,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     nsseq_idx_swap = OptFrame.add_nsseq(
         problem.engine,
-        initial_solution_pointer,
+        random_move_pointer_swap,
         iterator_init_ptr_swap,
         iterator_first_ptr_swap,
         iterator_next_ptr_swap,
@@ -136,7 +136,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     nsseq_idx_2opt = OptFrame.add_nsseq(
         problem.engine,
-        initial_solution_pointer,
+        random_move_pointer_2opt,
         iterator_init_ptr_2opt,
         iterator_first_ptr_2opt,
         iterator_next_ptr_2opt,
