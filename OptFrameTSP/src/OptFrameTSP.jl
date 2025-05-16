@@ -165,15 +165,15 @@ end
 function build_ils_basic_perturbation(
     problem::TSPProblem,
     evaluator_index::Integer,
-    ns_list_index::Integer,
     min_iterations,
     max_iterations,
+    ns_list_index::Integer,
 )::Integer
     return OptFrame.build_component(
         problem.engine,
         "OptFrame:ComponentBuilder:ILS:basic_pert",
-        "OptFrame:GeneralEvaluator:Evaluator $evaluator_index " *
-        "$max_iterations $min_iterations" *
+        "OptFrame:GeneralEvaluator:Evaluator $evaluator_index  " *
+        "$min_iterations  $max_iterations  " *
         "OptFrame:NS[] $ns_list_index",
         "OptFrame:ILS:basic_pert",
     )
@@ -194,7 +194,7 @@ function build_ils_single_obj_search(
         "OptFrame:GeneralEvaluator:Evaluator $evaluator_index " *
         "OptFrame:InitialSearch $initial_search_index " *
         "OptFrame:LocalSearch $local_search_list_index " *
-        "OptFrame:ILS:LevelPert $ils_perturbation_index" *
+        "OptFrame:ILS:basic_pert $ils_perturbation_index" *
         "$max_iterations",
     )
 end

@@ -9,7 +9,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     OptFrame.list_builders(problem.engine, "OptFrame:SingleObjSearch")
 
-    b2 = OptFrame.experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "-1")
+    b2 = OptFrame.experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "0")
 
     @show b2
 
@@ -161,15 +161,15 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         "OptFrame:NS[]",
     )
 
-    nsseq_component_list = OptFrame.create_component_list(
+    ns_component_list = OptFrame.create_component_list(
         problem.engine,
-        "[OptFrame:NS $nsseq_idx_swap, OptFrame:NS $nsseq_idx_2opt]",
+        "[OptFrame:NS $idx_ns_swap,OptFrame:NS $idx_ns_2opt]",
         "OptFrame:NS[]",
     )
 
 
     @info("created ns component lists $component_list_swap and $component_list_2opt")
-    @info("created nsseq component list $nsseq_component_list")
+    @info("created ns component list $ns_component_list")
 
     simulated_annealing_idx = TSP.build_global_search_simulated_annealing(
         problem,
@@ -183,24 +183,18 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     local_search_list = OptFrame.create_component_list(
         problem.engine,
-        "[OptFrame:LocalSearch $local_search_2opt, OptFrame:LocalSearch $local_search_swap]",
+        "[OptFrame:LocalSearch $local_search_2opt,OptFrame:LocalSearch $local_search_swap]",
         "OptFrame:LocalSearch[]",
     )
 
     @info("created component OptFrame:LocalSearch[] $local_search_list")
 
-
     vnd_idx = TSP.build_vnd_local_search(problem, evaluator_index, local_search_list)
     @info("created component OptFrame:LocalSearch:VND $vnd_idx")
 
-    ils_perturbation_idx = TSP.build_ils_basic_perturbation(
-        problem,
-        evaluator_index,
-        3,
-        12,
-        component_list_swap,
-    )
-    @info("created component OptFrame:ILS:LevelPert $ils_perturbation_idx")
+    ils_perturbation_idx = TSP.build_ils_basic_perturbation(problem, evaluator_index, 3, 12, component_list_swap)
+    @info("created component OptFrame:ILS:basic_pert $ils_perturbation_idx")
+
 
     ils_idx = TSP.build_ils_single_obj_search(
         problem,
@@ -213,7 +207,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     @info("created component OptFrame:ILS $ils_idx")
 
-    # lout = OptFrame.run_single_obj_search(problem.engine, ils_idx, 4.5)
+    lout = OptFrame.run_single_obj_search(problem.engine, ils_idx, 4.5)
 
     @info("try check (with disabled prints)")
 
