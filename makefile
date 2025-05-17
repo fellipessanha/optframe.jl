@@ -3,7 +3,7 @@ all: build/optframe_lib.so
 build/optframe_lib.so:
 	git submodule update --init --recursive
 	git submodule update
-	cd thirdparty/optframe-external/ && make optframe_lib_test
+	cd thirdparty/optframe-external/ && make optframe_lib
 	mkdir -p build/
 	mv thirdparty/optframe-external/build/*.so build/
 	ln -s build/optframe_lib.so test/
