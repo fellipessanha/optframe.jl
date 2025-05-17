@@ -272,7 +272,7 @@ function list_engine_components(engine::Engine, prefix::String)
 end
 
 function list_engine_components(engine::Engine)
-    return list_engine_components(engine, "")
+    return list_engine_components(engine, "OptFrame")
 end
 
 function optframe_api1d_create_component_list(
@@ -595,7 +595,7 @@ function onfail(code::Cint)::Cint
     return false
 end
 
-default_onfail_ptr = @cfunction(onfail, Cint, (Cint,Ptr{Cvoid}))
+default_onfail_ptr = @cfunction(onfail, Cint, (Cint, Ptr{Cvoid}))
 
 function optframe_api1d_engine_check(
     engine_ptr::Ptr{Cvoid},
