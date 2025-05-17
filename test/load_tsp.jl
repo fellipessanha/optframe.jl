@@ -196,13 +196,8 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     vnd_idx = TSP.build_vnd_local_search(problem.engine, evaluator_index, local_search_list)
     @info("created component OptFrame:LocalSearch:VND $vnd_idx")
 
-    ils_perturbation_idx = TSP.build_ils_basic_perturbation(
-        problem.engine,
-        evaluator_index,
-        3,
-        12,
-        idx_ns_swap,
-    )
+    ils_perturbation_idx =
+        TSP.build_ils_basic_perturbation(problem.engine, evaluator_index, idx_ns_swap)
     @info("created component OptFrame:ILS:basic_pert $ils_perturbation_idx")
 
 

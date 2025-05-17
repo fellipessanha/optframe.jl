@@ -165,8 +165,6 @@ end
 function build_ils_basic_perturbation(
     engine::OptFrame.Engine,
     evaluator_index::Integer,
-    min_iterations,
-    max_iterations,
     ns_list_index::Integer,
 )::Integer
     return OptFrame.build_component(
