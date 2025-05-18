@@ -154,18 +154,18 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     component_list_swap = OptFrame.create_component_list(
         problem.engine,
-        "[OptFrame:NS $idx_ns_swap]",
+        "[ OptFrame:NS $idx_ns_swap ]",
         "OptFrame:NS[]",
     )
     component_list_2opt = OptFrame.create_component_list(
         problem.engine,
-        "[OptFrame:NS $idx_ns_2opt]",
+        "[ OptFrame:NS $idx_ns_2opt ]",
         "OptFrame:NS[]",
     )
 
     ns_component_list = OptFrame.create_component_list(
         problem.engine,
-        "[OptFrame:NS $idx_ns_swap,OptFrame:NS $idx_ns_2opt]",
+        "[ OptFrame:NS $idx_ns_swap OptFrame:NS $idx_ns_2opt ]",
         "OptFrame:NS[]",
     )
 
@@ -177,24 +177,13 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         TSP.get_simulated_annealing_builder_strings(
             evaluator_index,
             initial_search_index,
-            idx_ns_swap,
+            ns_component_list,
         )
     simulated_annealing_idx = TSP.build_global_search_simulated_annealing(
         problem.engine,
         simulated_annealing_string,
     )
     @info("$simulated_annealing_string generated $simulated_annealing_idx")
-
-    # exps = OptFrame.run_experiments(
-    #     problem.engine,
-    #     10,
-    #     "$simulated_annealing_constructor $simulated_annealing_string",
-    #     0,
-    #     "",
-    #     60,
-    # )
-
-    @info("ran experiments $exps")
 
     local_search_swap =
         TSP.build_local_search(problem.engine, evaluator_index, idx_ns_swap, false)
@@ -203,7 +192,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     local_search_list = OptFrame.create_component_list(
         problem.engine,
-        "[OptFrame:LocalSearch $local_search_2opt,OptFrame:LocalSearch $local_search_swap]",
+        "[ OptFrame:LocalSearch $local_search_2opt OptFrame:LocalSearch $local_search_swap ]",
         "OptFrame:LocalSearch[]",
     )
 
