@@ -227,6 +227,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         0,
         "",
         problem.number_of_cities / 5.0,
+        4,
     )
 
 

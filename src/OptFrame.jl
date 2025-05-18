@@ -638,6 +638,7 @@ function optframe_api1d_run_experiments(
     first_seed::Cint,
     output_file::Cstring,
     time_limit::Cdouble,
+    log_level::Cint
 )
     creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_run_experiments")
     return @ccall $creation_symbol(
@@ -647,6 +648,7 @@ function optframe_api1d_run_experiments(
         first_seed::Cint,
         output_file::Cstring,
         time_limit::Cdouble,
+        log_level::Cint,
     )::Cint
 end
 
@@ -657,6 +659,7 @@ function run_experiments(
     first_seed::Integer,
     output_file::String,
     time_limit::Real,
+    log_level::Integer
 )::Integer
     c_builder_lines = Cstring(pointer(builder_lines))
     c_output_file = Cstring(pointer(output_file))
@@ -667,6 +670,7 @@ function run_experiments(
         Cint(first_seed),
         c_output_file,
         Cdouble(time_limit),
+        Cint(log_level)
     )
 end
 
