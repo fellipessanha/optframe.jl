@@ -211,8 +211,8 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         initial_search_index,
         vnd_idx,
         ils_perturbation_idx,
-        Int32(900000000),
-        Int32(10),
+        problem.number_of_cities * 10,
+        Integer(floor(problem.number_of_cities / 5.0)),
     )
 
     exps = OptFrame.run_experiments(

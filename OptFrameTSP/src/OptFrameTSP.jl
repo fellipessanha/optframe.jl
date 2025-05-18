@@ -88,7 +88,7 @@ function evaluate_solution(problem::TSPProblem, solution::TSPSolution)::Float64
             solution.cities_path[i], solution.cities_path[(i+1)%solution.path_size+1]
         evaluation += problem.distances[city1][city2]
     end
-    return -evaluation
+    return evaluation
 end
 
 function evaluate_solution(
