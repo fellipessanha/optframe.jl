@@ -631,4 +631,43 @@ function welcome(e::Engine)
     optframe_api0d_engine_welcome(e.hf)
 end
 
+function optframe_api1d_run_experiments(
+    engine::Ptr{Cvoid},
+    run_number::Cint,
+    builder_lines::Cstring,
+    first_seed::Cint,
+    output_file::Cstring,
+    time_limit::Cdouble,
+)
+    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_run_experiments")
+    return @ccall $creation_symbol(
+        engine::Ptr{Cvoid},
+        run_number::Cint,
+        builder_lines::Cstring,
+        first_seed::Cint,
+        output_file::Cstring,
+        time_limit::Cdouble,
+    )::Cint
+end
+
+function run_experiments(
+    engine::Engine,
+    run_number::Integer,
+    builder_lines::String,
+    first_seed::Integer,
+    output_file::String,
+    time_limit::Real,
+)::Integer
+    c_builder_lines = Cstring(pointer(builder_lines))
+    c_output_file = Cstring(pointer(output_file))
+    return optframe_api1d_run_experiments(
+        engine.hf,
+        Cint(run_number),
+        c_builder_lines,
+        Cint(first_seed),
+        c_output_file,
+        Cdouble(time_limit),
+    )
+end
+
 end # module Optframe

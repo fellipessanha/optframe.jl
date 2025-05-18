@@ -121,17 +121,32 @@ function free_tsp_solution(s_ptr_void::Ptr{Nothing})::Int32
     return 0
 end
 
+function get_simulated_annealing_builder_strings(
+    id_evaluator::Integer,
+    id_initial_search::Integer,
+    id_ns::Integer,
+)
+    return "OptFrame:ComponentBuilder:GlobalSearch:SA:BasicSA",
+    "OptFrame:GeneralEvaluator:Evaluator $id_evaluator OptFrame:InitialSearch $id_initial_search OptFrame:NS[] $id_ns 0.99 100 999"
+end
+
 function build_global_search_simulated_annealing(
     engine::OptFrame.Engine,
     id_evaluator::Integer,
     id_initial_search::Integer,
     id_ns::Integer,
 )::Integer
-    OptFrame.build_global_search(
-        engine,
-        "OptFrame:ComponentBuilder:GlobalSearch:SA:BasicSA",
-        "OptFrame:GeneralEvaluator:Evaluator $id_evaluator OptFrame:InitialSearch $id_initial_search OptFrame:NS[] $id_ns 0.99 100 999",
-    )
+    constructor, build_string =
+        get_simulated_annealing_builder_strings(id_evaluator, id_initial_search, id_ns)
+    return OptFrame.build_global_search(engine, constructor, build_string)
+end
+
+function build_global_search_simulated_annealing(
+    engine::OptFrame.Engine,
+    build_string::String,
+)
+    constructor, _ = get_simulated_annealing_builder_strings(1, 1, 1)
+    return OptFrame.build_global_search(engine, constructor, build_string)
 end
 
 function build_local_search(
@@ -177,6 +192,27 @@ function build_ils_basic_perturbation(
 end
 
 
+function get_ils_builder_string(
+    evaluator_index::Integer,
+    initial_search_index::Integer,
+    local_search_index::Integer,
+    ils_perturbation_index::Integer,
+    max_iterations::Integer,
+    max_perturbation_level::Integer,
+)
+    return "OptFrame:ComponentBuilder:SingleObjSearch:ILS:ILSLevels",
+    "OptFrame:GeneralEvaluator:Evaluator $evaluator_index " *
+    "OptFrame:InitialSearch $initial_search_index " *
+    "OptFrame:LocalSearch $local_search_index " *
+    "OptFrame:ILS:LevelPert $ils_perturbation_index " *
+    "$max_iterations $max_perturbation_level"
+end
+
+function build_ils_single_obj_search(engine::OptFrame.Engine, builder::String)::Integer
+    constructor, _ = get_ils_builder_string(0, 0, 0, 0, 0, 0)
+    return OptFrame.build_single_obj_search(engine, constructor, builder)
+end
+
 function build_ils_single_obj_search(
     engine::OptFrame.Engine,
     evaluator_index::Integer,
@@ -186,15 +222,15 @@ function build_ils_single_obj_search(
     max_iterations::Integer,
     max_perturbation_level::Integer,
 )::Integer
-    return OptFrame.build_single_obj_search(
-        engine,
-        "OptFrame:ComponentBuilder:SingleObjSearch:ILS:ILSLevels",
-        "OptFrame:GeneralEvaluator:Evaluator $evaluator_index " *
-        "OptFrame:InitialSearch $initial_search_index " *
-        "OptFrame:LocalSearch $local_search_index " *
-        "OptFrame:ILS:LevelPert $ils_perturbation_index " *
-        "$max_iterations $max_perturbation_level",
+    constructor, builder = get_ils_builder_string(
+        evaluator_index,
+        initial_search_index,
+        local_search_index,
+        ils_perturbation_index,
+        max_iterations,
+        max_perturbation_level,
     )
+    return OptFrame.build_single_obj_search(engine, constructor, builder)
 end
 
 end # module TSP

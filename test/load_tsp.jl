@@ -173,12 +173,28 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("created ns component lists $component_list_swap and $component_list_2opt")
     @info("created ns component list $ns_component_list")
 
+    simulated_annealing_constructor, simulated_annealing_string =
+        TSP.get_simulated_annealing_builder_strings(
+            evaluator_index,
+            initial_search_index,
+            idx_ns_swap,
+        )
     simulated_annealing_idx = TSP.build_global_search_simulated_annealing(
         problem.engine,
-        evaluator_index,
-        initial_search_index,
-        idx_ns_swap,
+        simulated_annealing_string,
     )
+    @info("$simulated_annealing_string generated $simulated_annealing_idx")
+
+    exps = OptFrame.run_experiments(
+        problem.engine,
+        10,
+        "$simulated_annealing_constructor $simulated_annealing_string",
+        0,
+        "",
+        60,
+    )
+
+    @info("ran experiments $exps")
 
     local_search_swap =
         TSP.build_local_search(problem.engine, evaluator_index, idx_ns_swap, false)
@@ -201,8 +217,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("created component OptFrame:ILS:basic_pert $ils_perturbation_idx")
 
 
-    ils_idx = TSP.build_ils_single_obj_search(
-        problem.engine,
+    ils_constructor, ils_builder_string = TSP.get_ils_builder_string(
         evaluator_index,
         initial_search_index,
         vnd_idx,
@@ -211,17 +226,29 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         Int32(10),
     )
 
-    @info("created component OptFrame:ILS $ils_idx")
+    exps = OptFrame.run_experiments(
+        problem.engine,
+        10,
+        "$ils_constructor $ils_builder_string",
+        0,
+        "",
+        60,
+    )
 
-    lout = OptFrame.run_single_obj_search(problem.engine, ils_idx, 4.5)
 
-    best_solution = TSP.load_void_into_obj(lout.best_s, TSP.TSPSolution)
-    @info("ILS with VND finished! results: $(lout.best_e)")
-    @show best_solution
-
-    @info("try check (with disabled prints)")
-
-    @test OptFrame.check(problem.engine, 100, 5, false)
-
+    # ils_idx = build_ils_single_obj_search(problem.engine, ils_builder_string)
+    #
+    # @info("created component OptFrame:ILS $ils_idx")
+    #
+    # lout = OptFrame.run_single_obj_search(problem.engine, ils_idx, 4.5)
+    #
+    # best_solution = TSP.load_void_into_obj(lout.best_s, TSP.TSPSolution)
+    # @info("ILS with VND finished! results: $(lout.best_e)")
+    # @show best_solution
+    #
+    # @info("try check (with disabled prints)")
+    #
+    # @test OptFrame.check(problem.engine, 100, 5, false)
+    #
     return nothing
 end
