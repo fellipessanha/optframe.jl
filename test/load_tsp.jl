@@ -42,7 +42,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("evaluation from object: $evaluation")
 
     evaluator_pointer = @cfunction(TSP.evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoid}))
-    evaluator_index   = OptFrame.add_evaluator(problem.engine, evaluator_pointer, false, problem_void)
+    evaluator_index   = OptFrame.add_evaluator(problem.engine, evaluator_pointer, true, problem_void)
 
     @info("added evaluator with index $evaluator_index")
 
@@ -165,7 +165,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     ns_component_list = OptFrame.create_component_list(
         problem.engine,
-        "[ OptFrame:NS $idx_ns_swap OptFrame:NS $idx_ns_2opt ]",
+        "[ OptFrame:NS $idx_ns_swap OptFrame:NS $idx_ns_2opt]",
         "OptFrame:NS[]",
     )
 
@@ -179,6 +179,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
             initial_search_index,
             ns_component_list,
         )
+
     simulated_annealing_idx = TSP.build_global_search_simulated_annealing(
         problem.engine,
         simulated_annealing_string,
@@ -206,18 +207,22 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("created component OptFrame:ILS:basic_pert $ils_perturbation_idx")
 
 
+    n = problem.number_of_cities * 100
+    pert = Integer(floor(problem.number_of_cities / 5.0))
+    @info("number of cities: $n")
     ils_constructor, ils_builder_string = TSP.get_ils_builder_string(
         evaluator_index,
         initial_search_index,
         vnd_idx,
         ils_perturbation_idx,
-        problem.number_of_cities * 10,
-        Integer(floor(problem.number_of_cities / 5.0)),
+        n,
+        pert
     )
 
     exps = OptFrame.run_experiments(
         problem.engine,
         1,
+        "$simulated_annealing_constructor $simulated_annealing_string\n" *
         "$ils_constructor $ils_builder_string",
         0,
         "",
