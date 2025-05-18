@@ -11,7 +11,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     OptFrame.list_builders(problem.engine, "OptFrame:SingleObjSearch")
 
-    b2 = OptFrame.experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "0")
+    b2 = OptFrame.experimental_set_parameter(problem.engine, "COMPONENT_LOG_LEVEL", "4")
 
     @show b2
 
@@ -185,14 +185,14 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     )
     @info("$simulated_annealing_string generated $simulated_annealing_idx")
 
-    exps = OptFrame.run_experiments(
-        problem.engine,
-        10,
-        "$simulated_annealing_constructor $simulated_annealing_string",
-        0,
-        "",
-        60,
-    )
+    # exps = OptFrame.run_experiments(
+    #     problem.engine,
+    #     10,
+    #     "$simulated_annealing_constructor $simulated_annealing_string",
+    #     0,
+    #     "",
+    #     60,
+    # )
 
     @info("ran experiments $exps")
 
@@ -222,17 +222,17 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         initial_search_index,
         vnd_idx,
         ils_perturbation_idx,
-        Int32(40),
+        Int32(900000000),
         Int32(10),
     )
 
     exps = OptFrame.run_experiments(
         problem.engine,
-        10,
+        1,
         "$ils_constructor $ils_builder_string",
         0,
         "",
-        60,
+        problem.number_of_cities / 5.0,
     )
 
 
