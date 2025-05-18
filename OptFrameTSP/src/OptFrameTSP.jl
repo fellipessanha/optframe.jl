@@ -50,7 +50,7 @@ function initialize_tsp_problem(
 )::TSPProblem where {T,U<:Integer}
     cint_cities = Cint.(cities)
 
-    return initialize_tsp_problem(cint_cities, x_coordinates, y_coordinates, Cint(0))
+    return initialize_tsp_problem(cint_cities, x_coordinates, y_coordinates, Cint(4))
 end
 
 function generate_random_initial_solution(problem::TSPProblem)::TSPSolution
