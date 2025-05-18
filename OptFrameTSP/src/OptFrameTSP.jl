@@ -127,7 +127,7 @@ function get_simulated_annealing_builder_strings(
     id_ns::Integer,
 )
     return "OptFrame:ComponentBuilder:GlobalSearch:SA:BasicSA",
-    "OptFrame:GeneralEvaluator:Evaluator $id_evaluator OptFrame:InitialSearch $id_initial_search OptFrame:NS[] $id_ns 0.99 100 999"
+    "OptFrame:GeneralEvaluator:Evaluator $id_evaluator OptFrame:InitialSearch $id_initial_search OptFrame:NS[] $id_ns 0.995 1000 10000"
 end
 
 function build_global_search_simulated_annealing(
