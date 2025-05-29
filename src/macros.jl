@@ -2,6 +2,19 @@
 # f_ev_ptr = @cfunction(KP.evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoid}))
 # idx_ev   = OptFrame.add_evaluator(problem.engine, f_ev_ptr, false, Ptr{Nothing}(problem_ptr))
 
+@doc raw"""
+    @add_evaluator
+
+## Example
+
+```julia
+OptFrame.@add_evaluator(
+    problem,
+    func::Cdouble, # `function_name`::`return_type`
+    true,          # is maximization sense?
+)
+```
+"""
 macro add_evaluator(problem, expr::Expr, maximize::Bool = false)
     # pedir que expr seja da forma `@add_evaluator fptr::T`
     @assert expr.head === :(::)
