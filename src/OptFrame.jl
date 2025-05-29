@@ -11,6 +11,8 @@ export run_global_search, build_single_obj_search, run_single_obj_search
 export experimental_set_parameter
 export add_ns_v2
 
+include("macros.jl")
+
 const libpath = joinpath(@__DIR__, "..", "build", "optframe_lib.so")
 
 const optframe_ptr = Ref{Ptr{Nothing}}()
