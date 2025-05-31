@@ -42,16 +42,17 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("evaluation from object: $evaluation")
 
     evaluator_pointer = @cfunction(TSP.evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoid}))
-    evaluator_index   = OptFrame.add_evaluator(problem.engine, evaluator_pointer, true, problem_void)
+    evaluator = OptFrame.add_evaluator(problem.engine, evaluator_pointer, true, problem_void)
+    evaluator_index = evaluator.index
 
-    @info("added evaluator with index $evaluator_index")
+    @info("added evaluator $evaluator")
 
     initial_solution_pointer  = @cfunction(TSP.generate_random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
     deepcopy_callback_pointer = @cfunction(TSP.callback_deep_copy, Ptr{Cvoid}, (Ptr{Cvoid},))
     tostring_callback_pointer = @cfunction(TSP.callback_tostring_tsp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
     free_tsp_solution_pointer = @cfunction(TSP.free_tsp_solution, Cint, (Ptr{Cvoid},))
 
-    constructive_index = OptFrame.add_constructive(
+    constructive= OptFrame.add_constructive(
         problem.engine,
         initial_solution_pointer,
         problem_void,
@@ -59,13 +60,15 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         tostring_callback_pointer,
         free_tsp_solution_pointer,
     )
+    constructive_index = constructive.index
 
-    @info("created component OptFrame:Constructive $constructive_index")
+    @info("created component $constructive")
 
-    initial_search_index =
-        OptFrame.create_initial_search(problem.engine, evaluator_index, constructive_index)
+    initial_search =
+        OptFrame.create_initial_search(problem.engine, evaluator, constructive)
+    initial_search_index = initial_search.index
 
-    @info("created component OptFrame:InitialSearch $initial_search_index")
+    @info("created component $initial_search")
 
     swap_move = TSP.generate_random_move_swap(problem, solution)
     swap_move = TSP.generate_random_move_2opt(problem, solution)
@@ -80,7 +83,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     equals_move_pointer_swap         = @cfunction(TSP.move_is_equal_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
     can_be_applied_move_pointer_swap = @cfunction(TSP.move_can_be_applied_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
 
-    idx_ns_swap = OptFrame.add_ns(
+    ns_swap = OptFrame.add_ns(
         problem.engine,
         random_move_pointer_swap,
         apply_move_pointer_swap,
@@ -89,13 +92,14 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         problem_void,
         free_tsp_solution_pointer,
     )
+    idx_ns_swap = ns_swap.index
 
     random_move_pointer_2opt         = @cfunction(TSP.generate_random_move_2opt, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
     apply_move_pointer_2opt          = @cfunction(TSP.apply_move_2opt, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
     equals_move_pointer_2opt         = @cfunction(TSP.move_is_equal_2opt, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
     can_be_applied_move_pointer_2opt = @cfunction(TSP.move_can_be_applied_2opt, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
 
-    idx_ns_2opt = OptFrame.add_ns(
+    ns_2opt = OptFrame.add_ns(
         problem.engine,
         random_move_pointer_2opt,
         apply_move_pointer_2opt,
@@ -104,9 +108,10 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         problem_void,
         free_tsp_solution_pointer,
     )
+    idx_ns_2opt = ns_2opt.index
 
-    @info("created component OptFrame:NS:FNS $idx_ns_swap")
-    @info("created component OptFrame:NS:FNS $idx_ns_2opt")
+    @info("created component $ns_swap")
+    @info("created component $ns_2opt")
 
     iterator_init_ptr_swap    = @cfunction(TSP.nsseq_swap_iterator_init, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
     iterator_first_ptr_swap   = @cfunction(TSP.nsseq_swap_iterator_first, Cint, (Ptr{Cvoid}, Ptr{Cvoid}))
