@@ -30,7 +30,23 @@ mutable struct Engine
     gc_arena::IdDict{Ptr{Cvoid},Any}
     ll_int::Int
     hf::Ptr{Cvoid}
+
+    Engine(gc_arena::IdDict{Ptr{Cvoid},Any}, ll_int::Integer, hf::Ptr{Cvoid}) =
+        new(gc_arena, ll_int, hf)
+    Engine(ll_int::Integer) = init_engine(ll_int)
+    Engine() = init_engine(0)
 end
+
+struct Component{T}
+    index::Integer
+
+    function Component{T}(idx::Integer) where {T}
+        @assert(idx >= 0, "Index must be non-negative")
+        @assert(T isa Symbol, "Component type must be a Symbol")
+
+        return new{T}(idx)
+    end
+end 
 
 include("Random.jl")
 
@@ -306,6 +322,10 @@ function optframe_api1d_engine_list_builders(engine::Ptr{Cvoid}, list_type::Cstr
     creation_symbol =
         get_function_symbol(optframe_ptr[], "optframe_api1d_engine_list_builders")
     return @ccall $creation_symbol(engine::Ptr{Cvoid}, list_type::Cstring)::Cint
+end
+
+function list_builders(engine::Engine, list_type::Symbol)
+    return list_builders(engine, string(list_type))
 end
 
 function list_builders(engine::Engine, list_type::String)
