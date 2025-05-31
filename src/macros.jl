@@ -1,6 +1,8 @@
-# O que queremos fazer:
-# f_ev_ptr = @cfunction(KP.evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoid}))
-# idx_ev   = OptFrame.add_evaluator(problem.engine, f_ev_ptr, false, Ptr{Nothing}(problem_ptr))
+macro optcomponent_str(str)
+    base_string = "OptFrame:"
+    @assert(occursin(base_string, str), "OptFrame components must be prefixed with $(base_string)")
+    return :(Component{Symbol($str)})
+end
 
 @doc raw"""
     @add_evaluator
