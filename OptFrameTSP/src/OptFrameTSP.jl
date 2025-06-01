@@ -18,25 +18,20 @@ function initialize_tsp_problem(
     distances = Vector{T}[]
 
     for i = 1:n_cities
-        row = T[]
-
-        for j = 1:n_cities
-            push!(
-                row,
-                euclidean_distance(
-                    x_coordinates[i],
-                    y_coordinates[i],
-                    x_coordinates[j],
-                    y_coordinates[j],
-                ),
-            )
-        end
+        row = [
+            euclidean_distance(
+                x_coordinates[i],
+                y_coordinates[i],
+                x_coordinates[j],
+                y_coordinates[j],
+            ) for j = 1:n_cities
+        ]
 
         push!(distances, row)
     end
 
     return TSPProblem(
-        OptFrame.init_engine(log_level),
+        OptFrame.Engine(log_level),
         n_cities,
         x_coordinates,
         y_coordinates,
