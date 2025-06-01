@@ -11,21 +11,23 @@ include("random_generator.jl")
 
 function main()
     @testset "OptFrame.jl Test Suite" verbose = true begin
-        # @testset "■ Load OptFrame" verbose = true begin
-        #     load_optframe()
-        # end
 
-        # @testset "■ Random Number Generator" verbose = true begin
-        #     random_generator()
-        # end
+        @testset "■ Load OptFrame" verbose = true begin
+            load_optframe()
+        end
+
+        @testset "■ Random Number Generator" verbose = true begin
+            random_generator()
+        end
 
         @testset "▶ TSP" verbose = true begin
             load_tsp()
         end
 
-        # @testset "▶ Knapsack" verbose = true begin
-        #     load_kp()
-        # end
+        @testset "▶ Knapsack" verbose = true begin
+            load_kp()
+        end
+
     end
 
     return nothing
