@@ -1,6 +1,7 @@
 module OptFrameKnapsack
 
 import OptFrame
+import Random: randperm
 
 mutable struct KnapsackProblem
     vweights::Vector{Float64}
@@ -70,7 +71,7 @@ end
 function random_initial_solution(problem::KnapsackProblem)::KnapsackSolution
     selection = falses(problem.nitems)
     sum = 0.0
-    for i in OptFrame.shuffle(problem.engine, 1:problem.nitems)
+    for i in randperm(problem.nitems)
         if sum + problem.vweights[i] <= problem.capacity
             selection[i] = true
             sum += problem.vweights[i]
