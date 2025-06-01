@@ -14,7 +14,8 @@ function optframe_api1d_engine_rand_n_n(eng::Ptr{Cvoid}, floor::Cint, ceiling::C
 end
 
 function optframe_api1d_engine_rand_set_seed(eng::Ptr{Cvoid}, seed::Cuint)::Cvoid
-    creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_engine_rand_set_seed")
+    creation_symbol =
+        get_function_symbol(optframe_ptr[], "optframe_api1d_engine_rand_set_seed")
     @ccall $creation_symbol(eng::Ptr{Cvoid}, seed::Cuint)::Cvoid
 end
 
@@ -26,15 +27,15 @@ function get_random(engine::Engine)::Cint
     return optframe_api1d_engine_rand(engine.hf)
 end
 
-function get_random(engine::Engine, ceiling::T)::T where T<:Integer
+function get_random(engine::Engine, ceiling::T)::T where {T<:Integer}
     return optframe_api1d_engine_rand_n(engine.hf, Cint(ceiling))
 end
 
-function get_random(engine::Engine, floor::T, ceiling::T)::T where T<:Integer
+function get_random(engine::Engine, floor::T, ceiling::T)::T where {T<:Integer}
     return optframe_api1d_engine_rand_n_n(engine.hf, Cint(floor), Cint(ceiling))
 end
 
-function shuffle(engine::Engine, v::Vector{T})::Vector{T} where T
+function shuffle(engine::Engine, v::Vector{T})::Vector{T} where {T}
     n = length(v)
     for i = 1:n
         j = get_random(engine, i, n)
@@ -43,7 +44,7 @@ function shuffle(engine::Engine, v::Vector{T})::Vector{T} where T
     return v
 end
 
-function shuffle(engine::Engine, range::UnitRange{T})::Vector{T} where T<:Integer
+function shuffle(engine::Engine, range::UnitRange{T})::Vector{T} where {T<:Integer}
     return shuffle(engine, collect(range))
 end
 

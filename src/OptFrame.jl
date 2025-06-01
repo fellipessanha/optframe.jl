@@ -46,7 +46,7 @@ struct Component{T}
 
         return new{T}(idx)
     end
-end 
+end
 
 include("Random.jl")
 
@@ -367,11 +367,8 @@ function create_initial_search(
     evaluator::optcomponent"OptFrame:GeneralEvaluator",
     constructor::optcomponent"OptFrame:Constructive",
 )::optcomponent"OptFrame:InitialSearch"
-    is_idx = optframe_api1d_create_initial_search(
-        engine.hf,
-        evaluator.index,
-        constructor.index,
-    )
+    is_idx =
+        optframe_api1d_create_initial_search(engine.hf, evaluator.index, constructor.index)
 
     return optcomponent"OptFrame:InitialSearch"(is_idx)
 end
@@ -673,7 +670,7 @@ function optframe_api1d_run_experiments(
     first_seed::Cint,
     output_file::Cstring,
     time_limit::Cdouble,
-    log_level::Cint
+    log_level::Cint,
 )
     creation_symbol = get_function_symbol(optframe_ptr[], "optframe_api1d_run_experiments")
     return @ccall $creation_symbol(
@@ -694,7 +691,7 @@ function run_experiments(
     first_seed::Integer,
     output_file::String,
     time_limit::Real,
-    log_level::Integer
+    log_level::Integer,
 )::Integer
     c_builder_lines = Cstring(pointer(builder_lines))
     c_output_file = Cstring(pointer(output_file))
@@ -705,7 +702,7 @@ function run_experiments(
         Cint(first_seed),
         c_output_file,
         Cdouble(time_limit),
-        Cint(log_level)
+        Cint(log_level),
     )
 end
 
