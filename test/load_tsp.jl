@@ -42,7 +42,8 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("evaluation from object: $evaluation")
 
     evaluator_pointer = @cfunction(TSP.evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoid}))
-    evaluator = OptFrame.add_evaluator(problem.engine, evaluator_pointer, true, problem_void)
+    evaluator =
+        OptFrame.add_evaluator(problem.engine, evaluator_pointer, true, problem_void)
     evaluator_index = evaluator.index
 
     @info("added evaluator $evaluator")
@@ -52,7 +53,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     tostring_callback_pointer = @cfunction(TSP.callback_tostring_tsp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
     free_tsp_solution_pointer = @cfunction(TSP.free_tsp_solution, Cint, (Ptr{Cvoid},))
 
-    constructive= OptFrame.add_constructive(
+    constructive = OptFrame.add_constructive(
         problem.engine,
         initial_solution_pointer,
         problem_void,
@@ -64,8 +65,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     @info("created component $constructive")
 
-    initial_search =
-        OptFrame.create_initial_search(problem.engine, evaluator, constructive)
+    initial_search = OptFrame.create_initial_search(problem.engine, evaluator, constructive)
     initial_search_index = initial_search.index
 
     @info("created component $initial_search")
