@@ -63,7 +63,16 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     )
     constructive_index = constructive.index
 
+    new_constructive = OptFrame.@add_constructive(
+        problem,
+        TSP.generate_random_initial_solution,
+        TSP.callback_deep_copy,
+        TSP.callback_tostring_tsp,
+        TSP.free_tsp_solution
+    )
+
     @info("created component $constructive")
+    @info("created component $new_constructive with macro")
 
     initial_search = OptFrame.create_initial_search(problem.engine, evaluator, constructive)
     initial_search_index = initial_search.index
