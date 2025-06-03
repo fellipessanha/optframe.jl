@@ -41,9 +41,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     @info("evaluation from object: $evaluation")
 
-    evaluator_pointer = @cfunction(TSP.evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoid}))
-    evaluator =
-        OptFrame.add_evaluator(problem.engine, evaluator_pointer, true, problem_void)
+    evaluator = OptFrame.@add_evaluator(problem, TSP.evaluate_solution::Cdouble)
     evaluator_index = evaluator.index
 
     @info("added evaluator $evaluator")
