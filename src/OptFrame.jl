@@ -109,6 +109,14 @@ function free_nothing_pointer(s_ptr_void::Ptr{Nothing}, ::Type{T})::Int32 where 
     return 0
 end
 
+function deepcopy_nothing_pointer(ptr::Ptr{Nothing}, ::Type{T})::Ptr{Nothing} where {T}
+    s1_ptr = convert(Ptr{T}, ptr)
+    s1 = unsafe_load(s1_ptr)
+    s2 = deepcopy(s1)
+    sol2_raw_ptr = OptFrame.global_register(s2)
+    return Ptr{Nothing}(sol2_raw_ptr)
+end
+
 function callback_tostring(_::Ptr{Cvoid}, buffer::Ptr{Cchar}, size::Csize_t)::Csize_t
     s = "solution as string"
     n = min(sizeof(s), size - 1)
