@@ -53,9 +53,7 @@ macro add_constructive(
     type = initial_solution_expr.args[2]
 
     free_solution_quote = quote
-        function free_solution(ptr::Ptr{Cvoid})
-            return OptFrame.free_nothing_pointer(ptr, $(type))
-        end
+        (ptr::Ptr{Nothing}) -> OptFrame.free_nothing_pointer(ptr, $(type))
     end
 
     return quote
