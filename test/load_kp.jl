@@ -49,13 +49,10 @@ function load_kp()
     f_str_ptr = @cfunction(KP.tostring_callback_julia_kp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
     f_del_ptr = @cfunction(KP.free_solution_kp, Cint, (Ptr{Cvoid},))
 
-    idx_c = OptFrame.add_constructive(
-        problem.engine,
-        f_is_ptr,
-        Ptr{Nothing}(problem_ptr),
-        f_cp_ptr,
-        f_str_ptr,
-        f_del_ptr,
+    idx_c = OptFrame.@add_constructive(
+        problem,
+        KP.random_initial_solution::KP.KnapsackSolution,
+        KP.callback_sol_deepcopy_kp,
     )
 
     @info("created component OptFrame:Constructive $idx_c")

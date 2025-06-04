@@ -46,16 +46,10 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     @info("added evaluator $evaluator")
 
-    initial_solution_pointer  = @cfunction(TSP.generate_random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
-    deepcopy_callback_pointer = @cfunction(TSP.callback_deep_copy, Ptr{Cvoid}, (Ptr{Cvoid},))
-    tostring_callback_pointer = @cfunction(TSP.callback_tostring_tsp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
-    free_tsp_solution_pointer = @cfunction(TSP.free_tsp_solution, Cint, (Ptr{Cvoid},))
-
     constructive = OptFrame.@add_constructive(
         problem,
-        TSP.generate_random_initial_solution,
+        TSP.generate_random_initial_solution::TSP.TSPSolution,
         TSP.callback_deep_copy,
-        TSP.free_tsp_solution
     )
     constructive_index = constructive.index
 
@@ -74,6 +68,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
           generated 2opt move: $swap_move
           """)
 
+    free_tsp_solution_pointer = @cfunction(TSP.free_tsp_solution, Cint, (Ptr{Cvoid},))
     random_move_pointer_swap         = @cfunction(TSP.generate_random_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
     apply_move_pointer_swap          = @cfunction(TSP.apply_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
     equals_move_pointer_swap         = @cfunction(TSP.move_is_equal_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
