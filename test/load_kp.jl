@@ -44,11 +44,6 @@ function load_kp()
 
     @info("will try add_constructive")
 
-    f_is_ptr  = @cfunction(KP.random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
-    f_cp_ptr  = @cfunction(KP.callback_sol_deepcopy_kp, Ptr{Cvoid}, (Ptr{Cvoid},))
-    f_str_ptr = @cfunction(KP.tostring_callback_julia_kp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
-    f_del_ptr = @cfunction(KP.free_solution_kp, Cint, (Ptr{Cvoid},))
-
     idx_c = OptFrame.@add_constructive(
         problem,
         KP.random_initial_solution::KP.KnapsackSolution,
