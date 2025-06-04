@@ -38,11 +38,7 @@ macro add_evaluator(problem, expr::Expr, maximize::Bool = false)
     end
 end
 
-macro add_constructive(
-    problem,
-    initial_solution_expr::Expr,
-    deepcopy_callback_pointer::Expr,
-)
+macro add_constructive(problem, initial_solution_expr::Expr)
     @assert(
         initial_solution_expr.head === :(::),
         "initial_solution_expr must be of the form `Function::SolutionType`"
@@ -56,10 +52,14 @@ macro add_constructive(
         (ptr::Ptr{Nothing}) -> OptFrame.free_nothing_pointer(ptr, $(type))
     end
 
+    deepcopy_callback_quote = quote
+        (ptr::Ptr{Nothing}) -> OptFrame.deepcopy_nothing_pointer(ptr, $(type))
+    end
+
     return quote
         let initial_solution_pointer =
                 @cfunction($(initial_solution_function), Ptr{Cvoid}, (Ptr{Cvoid},))
-            deepcopy_callback_pointer = @cfunction($(deepcopy_callback_pointer), Ptr{Cvoid}, (Ptr{Cvoid},))
+            deepcopy_callback_pointer = @cfunction($(deepcopy_callback_quote), Ptr{Cvoid}, (Ptr{Cvoid},))
             tostring_callback_pointer = @cfunction($(OptFrame.callback_tostring), Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
             free_tsp_solution_pointer = @cfunction($(free_solution_quote), Cint, (Ptr{Cvoid},))
             problem_ptr               = pointer_from_objref($(esc(problem)))

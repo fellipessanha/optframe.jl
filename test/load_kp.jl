@@ -38,7 +38,7 @@ function load_kp()
     @info("will try add_evaluator")
 
 
-    idx_ev   = OptFrame.@add_evaluator(problem, KP.evaluate_solution::Cdouble)
+    idx_ev = OptFrame.@add_evaluator(problem, KP.evaluate_solution::Cdouble)
 
     @info("created component OptFrame:GeneralEvaluator:Evaluator $idx_ev")
 
@@ -47,7 +47,6 @@ function load_kp()
     idx_c = OptFrame.@add_constructive(
         problem,
         KP.random_initial_solution::KP.KnapsackSolution,
-        KP.callback_sol_deepcopy_kp,
     )
 
     @info("created component OptFrame:Constructive $idx_c")

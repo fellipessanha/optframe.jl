@@ -49,7 +49,6 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     constructive = OptFrame.@add_constructive(
         problem,
         TSP.generate_random_initial_solution::TSP.TSPSolution,
-        TSP.callback_deep_copy,
     )
     constructive_index = constructive.index
 
@@ -68,7 +67,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
           generated 2opt move: $swap_move
           """)
 
-    free_tsp_solution_pointer = @cfunction(TSP.free_tsp_solution, Cint, (Ptr{Cvoid},))
+    free_tsp_solution_pointer        = @cfunction(TSP.free_tsp_solution, Cint, (Ptr{Cvoid},))
     random_move_pointer_swap         = @cfunction(TSP.generate_random_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
     apply_move_pointer_swap          = @cfunction(TSP.apply_move_swap, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
     equals_move_pointer_swap         = @cfunction(TSP.move_is_equal_swap, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
@@ -212,7 +211,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         vnd_idx,
         ils_perturbation_idx,
         n,
-        pert
+        pert,
     )
 
     exps = OptFrame.run_experiments(
