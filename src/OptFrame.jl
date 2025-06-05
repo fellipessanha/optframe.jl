@@ -12,6 +12,7 @@ export experimental_set_parameter
 export add_ns_v2
 
 include("macros.jl")
+include("Component.jl")
 
 const libpath = joinpath(@__DIR__, "..", "build", "optframe_lib.so")
 
@@ -37,16 +38,6 @@ mutable struct Engine
     Engine() = init_engine(0)
 end
 
-struct Component{T}
-    index::Integer
-
-    function Component{T}(idx::Integer) where {T}
-        @assert(idx >= 0, "Index must be non-negative")
-        @assert(T isa Symbol, "Component type must be a Symbol")
-
-        return new{T}(idx)
-    end
-end
 
 include("Random.jl")
 
