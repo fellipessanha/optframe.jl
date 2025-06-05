@@ -5,7 +5,17 @@ struct Component{T}
         @assert(idx >= 0, "Index must be non-negative")
         @assert(T isa Symbol, "Component specification type must be a Symbol")
 
-        return new{Symbol(T)}(idx)
+        return new{T}(idx)
+    end
+
+    function Component(component::String, idx::Integer)
+        @assert(idx >= 0, "Index must be non-negative")
+
+        if !startswith(component, "OptFrame:")
+            component = "OptFrame:" * component
+        end
+
+        return new{Symbol(component)}(idx)
     end
 end
 
