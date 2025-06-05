@@ -158,9 +158,9 @@ function build_local_search(
     id_evaluator::Integer,
     id_nsseq::Integer,
     is_best_improvement::Bool,
-)::Integer
+)::OptFrame.Component
     improvement_strategy = is_best_improvement ? "BI" : "FI"
-    ls_idx = OptFrame.build_local_search(
+    return OptFrame.build_local_search(
         engine,
         "OptFrame:ComponentBuilder:LocalSearch:$improvement_strategy",
         "OptFrame:GeneralEvaluator:Evaluator $id_evaluator  OptFrame:NS:NSFind:NSSeq $id_nsseq",
@@ -170,13 +170,13 @@ end
 
 function build_vnd_local_search(
     engine::OptFrame.Engine,
-    evaluator_index::Integer,
-    local_search_list_index::Integer,
-)::Integer
+    evaluator::OptFrame.optcomponent"GeneralEvaluator",
+    local_search_list::OptFrame.optcomponent"LocalSearch[]",
+)::OptFrame.Component
     return OptFrame.build_component(
         engine,
         "OptFrame:ComponentBuilder:LocalSearch:VND",
-        "OptFrame:GeneralEvaluator:Evaluator $evaluator_index  OptFrame:LocalSearch[] $local_search_list_index",
+        "$evaluator $local_search_list",
         "OptFrame:LocalSearch:VND",
     )
 end
@@ -185,7 +185,7 @@ function build_ils_basic_perturbation(
     engine::OptFrame.Engine,
     evaluator_index::Integer,
     ns_list_index::Integer,
-)::Integer
+)::OptFrame.Component
     return OptFrame.build_component(
         engine,
         "OptFrame:ComponentBuilder:ILS:LevelPert:LPlus2",
