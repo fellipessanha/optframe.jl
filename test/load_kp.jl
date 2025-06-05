@@ -38,25 +38,15 @@ function load_kp()
     @info("will try add_evaluator")
 
 
-    f_ev_ptr = @cfunction(KP.evaluate_solution, Cdouble, (Ptr{Cvoid}, Ptr{Cvoid}))
-    idx_ev   = OptFrame.add_evaluator(problem.engine, f_ev_ptr, false, Ptr{Nothing}(problem_ptr))
+    idx_ev = OptFrame.@add_evaluator(problem, KP.evaluate_solution::Cdouble)
 
     @info("created component OptFrame:GeneralEvaluator:Evaluator $idx_ev")
 
     @info("will try add_constructive")
 
-    f_is_ptr  = @cfunction(KP.random_initial_solution, Ptr{Cvoid}, (Ptr{Cvoid},))
-    f_cp_ptr  = @cfunction(KP.callback_sol_deepcopy_kp, Ptr{Cvoid}, (Ptr{Cvoid},))
-    f_str_ptr = @cfunction(KP.tostring_callback_julia_kp, Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
-    f_del_ptr = @cfunction(KP.free_solution_kp, Cint, (Ptr{Cvoid},))
-
-    idx_c = OptFrame.add_constructive(
-        problem.engine,
-        f_is_ptr,
-        Ptr{Nothing}(problem_ptr),
-        f_cp_ptr,
-        f_str_ptr,
-        f_del_ptr,
+    idx_c = OptFrame.@add_constructive(
+        problem,
+        KP.random_initial_solution::KP.KnapsackSolution,
     )
 
     @info("created component OptFrame:Constructive $idx_c")

@@ -1,6 +1,9 @@
 macro optcomponent_str(str)
     base_string = "OptFrame:"
-    @assert(occursin(base_string, str), "OptFrame components must be prefixed with $(base_string)")
+    @assert(
+        occursin(base_string, str),
+        "OptFrame components must be prefixed with $(base_string)"
+    )
     return :(Component{Symbol($str)})
 end
 
@@ -28,41 +31,48 @@ macro add_evaluator(problem, expr::Expr, maximize::Bool = false)
     return quote
         let p_ptr = Ptr{Nothing}(pointer_from_objref($(esc(problem))))
             c_ptr = @cfunction($fptr, $type, (Ptr{Cvoid}, Ptr{Cvoid}))
-            
-            OptFrame.add_evaluator(
-                $(esc(problem)).engine,
-                c_ptr,
-                $(esc(maximize)),
-                p_ptr,
-            )
+
+            OptFrame.add_evaluator($(esc(problem)).engine, c_ptr, $(esc(maximize)), p_ptr)
 
         end
     end
 end
 
-macro add_constructive(
-	problem,
-	initial_solution_pointer::Expr,
-	deepcopy_callback_pointer::Expr,
-	tostring_callback_pointer::Expr,
-	free_tsp_solution_pointer::Expr,
-)
-	return quote
-		let initial_solution_pointer  = @cfunction($(initial_solution_pointer), Ptr{Cvoid}, (Ptr{Cvoid},))
-			deepcopy_callback_pointer = @cfunction($(deepcopy_callback_pointer), Ptr{Cvoid}, (Ptr{Cvoid},))
-			tostring_callback_pointer = @cfunction($(tostring_callback_pointer), Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
-			free_tsp_solution_pointer = @cfunction($(free_tsp_solution_pointer), Cint, (Ptr{Cvoid},))
-			problem_ptr               = pointer_from_objref($(esc(problem)))
+macro add_constructive(problem, initial_solution_expr::Expr)
+    @assert(
+        initial_solution_expr.head === :(::),
+        "initial_solution_expr must be of the form `Function::SolutionType`"
+    )
+    @assert length(initial_solution_expr.args) === 2
+
+    initial_solution_function = initial_solution_expr.args[1]
+    type = initial_solution_expr.args[2]
+
+    free_solution_quote = quote
+        (ptr::Ptr{Nothing}) -> OptFrame.free_nothing_pointer(ptr, $(type))
+    end
+
+    deepcopy_callback_quote = quote
+        (ptr::Ptr{Nothing}) -> OptFrame.deepcopy_nothing_pointer(ptr, $(type))
+    end
+
+    return quote
+        let initial_solution_pointer =
+                @cfunction($(initial_solution_function), Ptr{Cvoid}, (Ptr{Cvoid},))
+            deepcopy_callback_pointer = @cfunction($(deepcopy_callback_quote), Ptr{Cvoid}, (Ptr{Cvoid},))
+            tostring_callback_pointer = @cfunction($(OptFrame.callback_tostring), Csize_t, (Ptr{Cvoid}, Ptr{Cchar}, Csize_t))
+            free_tsp_solution_pointer = @cfunction($(free_solution_quote), Cint, (Ptr{Cvoid},))
+            problem_ptr               = pointer_from_objref($(esc(problem)))
 
 
-				idx_ns = OptFrame.add_constructive(
-					$(esc(problem)).engine,
-					initial_solution_pointer,
-					problem_ptr,
-					deepcopy_callback_pointer,
-					tostring_callback_pointer,
-					free_tsp_solution_pointer,
-				)
-		end
-	end
+            idx_ns = OptFrame.add_constructive(
+                $(esc(problem)).engine,
+                initial_solution_pointer,
+                problem_ptr,
+                deepcopy_callback_pointer,
+                tostring_callback_pointer,
+                free_tsp_solution_pointer,
+            )
+        end
+    end
 end

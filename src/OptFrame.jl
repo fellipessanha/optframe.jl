@@ -103,6 +103,28 @@ function global_register(obj::T)::Ptr{T} where {T}
     return Ptr{T}(ptr)
 end
 
+function free_nothing_pointer(s_ptr_void::Ptr{Nothing}, ::Type{T})::Int32 where {T}
+    s_ptr = convert(Ptr{T}, s_ptr_void)
+    OptFrame.global_unregister(s_ptr)
+    return 0
+end
+
+function deepcopy_nothing_pointer(ptr::Ptr{Nothing}, ::Type{T})::Ptr{Nothing} where {T}
+    s1_ptr = convert(Ptr{T}, ptr)
+    s1 = unsafe_load(s1_ptr)
+    s2 = deepcopy(s1)
+    sol2_raw_ptr = OptFrame.global_register(s2)
+    return Ptr{Nothing}(sol2_raw_ptr)
+end
+
+function callback_tostring(_::Ptr{Cvoid}, buffer::Ptr{Cchar}, size::Csize_t)::Csize_t
+    s = "solution as string"
+    n = min(sizeof(s), size - 1)
+    unsafe_copyto!(buffer, pointer(s), n)
+    unsafe_store!(buffer + n, 0)
+    return sizeof(s)
+end
+
 function global_unregister(ptr::Ptr{T}) where {T}
     # function global_unregister(ptr::Ptr{Nothing})::Bool
     key = Ptr{Cvoid}(ptr)
