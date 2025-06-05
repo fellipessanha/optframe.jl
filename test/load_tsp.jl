@@ -42,7 +42,6 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("evaluation from object: $evaluation")
 
     evaluator = OptFrame.@add_evaluator(problem, TSP.evaluate_solution::Cdouble)
-    evaluator_index = evaluator.index
 
     @info("added evaluator $evaluator")
 
@@ -50,12 +49,10 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         problem,
         TSP.generate_random_initial_solution::TSP.TSPSolution,
     )
-    constructive_index = constructive.index
 
     @info("created component $constructive")
 
     initial_search = OptFrame.create_initial_search(problem.engine, evaluator, constructive)
-    initial_search_index = initial_search.index
 
     @info("created component $initial_search")
 
@@ -152,27 +149,21 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         "[ OptFrame:NS $idx_ns_swap ]",
         "OptFrame:NS[]",
     )
-    component_list_2opt = OptFrame.create_component_list(
-        problem.engine,
-        "[ OptFrame:NS $idx_ns_2opt ]",
-        "OptFrame:NS[]",
-    )
 
-    ns_component_list = OptFrame.create_component_list(
-        problem.engine,
-        "[ OptFrame:NS $idx_ns_swap OptFrame:NS $idx_ns_2opt]",
-        "OptFrame:NS[]",
-    )
+    component_list_2opt = OptFrame.create_component_list(problem.engine, [ns_swap])
+    component_list_2opt = component_list_2opt.index
+
+    ns_component_list = OptFrame.create_component_list(problem.engine, [ns_2opt])
 
 
-    @info("created ns component lists $component_list_swap and $component_list_2opt")
-    @info("created ns component list $ns_component_list")
+    @info("created ns list $component_list_swap and $component_list_2opt")
+    @info("created ns list $ns_component_list")
 
     simulated_annealing_constructor, simulated_annealing_string =
         TSP.get_simulated_annealing_builder_strings(
-            evaluator_index,
-            initial_search_index,
-            ns_component_list,
+            evaluator.index,
+            initial_search.index,
+            ns_component_list.index,
         )
 
     simulated_annealing_idx = TSP.build_global_search_simulated_annealing(
@@ -182,34 +173,37 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("$simulated_annealing_string generated $simulated_annealing_idx")
 
     local_search_swap =
-        TSP.build_local_search(problem.engine, evaluator_index, idx_ns_swap, false)
+        TSP.build_local_search(problem.engine, evaluator.index, idx_ns_swap, false)
+
     local_search_2opt =
-        TSP.build_local_search(problem.engine, evaluator_index, idx_ns_2opt, false)
+        TSP.build_local_search(problem.engine, evaluator.index, idx_ns_2opt, false)
+
+    @info("local search created: $local_search_2opt")
+    @info("local search created: $local_search_swap")
 
     local_search_list = OptFrame.create_component_list(
         problem.engine,
-        "[ OptFrame:LocalSearch $local_search_2opt OptFrame:LocalSearch $local_search_swap ]",
-        "OptFrame:LocalSearch[]",
+        [local_search_2opt, local_search_swap],
     )
 
-    @info("created component OptFrame:LocalSearch[] $local_search_list")
+    @info("created component $local_search_list")
 
-    vnd_idx = TSP.build_vnd_local_search(problem.engine, evaluator_index, local_search_list)
-    @info("created component OptFrame:LocalSearch:VND $vnd_idx")
+    vnd = TSP.build_vnd_local_search(problem.engine, evaluator, local_search_list)
+    @info("created component $(vnd.index)")
 
-    ils_perturbation_idx =
-        TSP.build_ils_basic_perturbation(problem.engine, evaluator_index, idx_ns_swap)
-    @info("created component OptFrame:ILS:basic_pert $ils_perturbation_idx")
+    ils_perturbation =
+        TSP.build_ils_basic_perturbation(problem.engine, evaluator.index, idx_ns_swap)
+    @info("created component  $(ils_perturbation.index)")
 
 
     n = problem.number_of_cities * 100
     pert = Integer(floor(problem.number_of_cities / 5.0))
     @info("number of cities: $n")
     ils_constructor, ils_builder_string = TSP.get_ils_builder_string(
-        evaluator_index,
-        initial_search_index,
-        vnd_idx,
-        ils_perturbation_idx,
+        evaluator.index,
+        initial_search.index,
+        vnd.index,
+        ils_perturbation.index,
         n,
         pert,
     )
