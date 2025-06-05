@@ -173,7 +173,7 @@ function add_constructive(
         to_string_callback_ptr,
         decref_callback_ptr,
     )
-    return optcomponent"OptFrame:Constructive"(idx_c)
+    return optcomponent"Constructive"(idx_c)
 end
 
 function optframe_api1d_add_evaluator(
@@ -200,7 +200,7 @@ function add_evaluator(
     # TODO: keep function 'ev_callback_ptr'?
     idx_ev =
         optframe_api1d_add_evaluator(e.hf, ev_callback_ptr, Int32(min_or_max), problemCtx)
-    return optcomponent"OptFrame:GeneralEvaluator"(idx_ev)
+    return optcomponent"GeneralEvaluator"(idx_ev)
 end
 
 function optframe_api1d_add_ns(
@@ -243,7 +243,7 @@ function add_ns(
         problemCtx,
         decref_callback_ptr,
     )
-    return optcomponent"OptFrame:NS"(idx_ns)
+    return optcomponent"NS"(idx_ns)
 end
 
 struct PairMoveDoubleLib
@@ -295,7 +295,7 @@ function add_ns_v2(
         decref_callback_ptr,
         fmove_apply_update,
     )
-    return optcomponent"OptFrame:NS"(idx_ns)
+    return optcomponent"NS"(idx_ns)
 end
 
 
@@ -386,13 +386,13 @@ end
 
 function create_initial_search(
     engine::Engine,
-    evaluator::optcomponent"OptFrame:GeneralEvaluator",
-    constructor::optcomponent"OptFrame:Constructive",
-)::optcomponent"OptFrame:InitialSearch"
+    evaluator::optcomponent"GeneralEvaluator",
+    constructor::optcomponent"Constructive",
+)::optcomponent"InitialSearch"
     is_idx =
         optframe_api1d_create_initial_search(engine.hf, evaluator.index, constructor.index)
 
-    return optcomponent"OptFrame:InitialSearch"(is_idx)
+    return optcomponent"InitialSearch"(is_idx)
 end
 
 function optframe_api1d_build_global(
