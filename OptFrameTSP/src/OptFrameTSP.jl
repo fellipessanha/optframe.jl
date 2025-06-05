@@ -125,6 +125,15 @@ function get_simulated_annealing_builder_strings(
     "OptFrame:GeneralEvaluator:Evaluator $id_evaluator OptFrame:InitialSearch $id_initial_search OptFrame:NS $id_ns 0.995 1000 10000"
 end
 
+function get_simulated_annealing_builder_strings(
+    evaluator::OptFrame.optcomponent"GeneralEvaluator:Evaluator",
+    initial_search::OptFrame.optcomponent"InitialSearch",
+    ns::OptFrame.optcomponent"NS[]",
+)
+    return "OptFrame:ComponentBuilder:GlobalSearch:SA:BasicSA",
+    "$evaluator $initial_search $ns 0.995 1000 10000"
+end
+
 function build_global_search_simulated_annealing(
     engine::OptFrame.Engine,
     id_evaluator::Integer,
