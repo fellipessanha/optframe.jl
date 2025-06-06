@@ -79,7 +79,6 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         problem_void,
         free_tsp_solution_pointer,
     )
-    idx_ns_swap = ns_swap.index
 
     random_move_pointer_2opt         = @cfunction(TSP.generate_random_move_2opt, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}))
     apply_move_pointer_2opt          = @cfunction(TSP.apply_move_2opt, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}))
@@ -95,7 +94,6 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
         problem_void,
         free_tsp_solution_pointer,
     )
-    idx_ns_2opt = ns_2opt.index
 
     @info("created component $ns_swap")
     @info("created component $ns_2opt")
@@ -146,7 +144,7 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
 
     component_list_swap = OptFrame.create_component_list(
         problem.engine,
-        "[ OptFrame:NS $idx_ns_swap ]",
+        "[ OptFrame:NS $(ns_swap.index) ]",
         "OptFrame:NS[]",
     )
 
@@ -173,10 +171,10 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     @info("$simulated_annealing_string generated $simulated_annealing_idx")
 
     local_search_swap =
-        TSP.build_local_search(problem.engine, evaluator.index, idx_ns_swap, false)
+        TSP.build_local_search(problem.engine, evaluator.index, ns_swap.index, false)
 
     local_search_2opt =
-        TSP.build_local_search(problem.engine, evaluator.index, idx_ns_2opt, false)
+        TSP.build_local_search(problem.engine, evaluator.index, ns_2opt.index, false)
 
     @info("local search created: $local_search_2opt")
     @info("local search created: $local_search_swap")
@@ -191,19 +189,18 @@ function load_tsp(; path::AbstractString = joinpath(@__DIR__, "data", "berlin52.
     vnd = TSP.build_vnd_local_search(problem.engine, evaluator, local_search_list)
     @info("created component $(vnd.index)")
 
-    ils_perturbation =
-        TSP.build_ils_basic_perturbation(problem.engine, evaluator.index, idx_ns_swap)
-    @info("created component  $(ils_perturbation.index)")
+    ils_perturbation = TSP.build_ils_basic_perturbation(problem.engine, evaluator, ns_swap)
+    @info("created component  $(ils_perturbation)")
 
 
     n = problem.number_of_cities * 100
     pert = Integer(floor(problem.number_of_cities / 5.0))
     @info("number of cities: $n")
     ils_constructor, ils_builder_string = TSP.get_ils_builder_string(
-        evaluator.index,
-        initial_search.index,
-        vnd.index,
-        ils_perturbation.index,
+        evaluator,
+        initial_search,
+        vnd,
+        ils_perturbation,
         n,
         pert,
     )
