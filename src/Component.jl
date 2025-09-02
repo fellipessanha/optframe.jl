@@ -22,3 +22,18 @@ end
 function Base.show(io::IO, c::T) where {T<:Component}
     print(io, "$(T.parameters[1]) $(c.index)")
 end
+
+function get_return_type_from_builder(
+    ::Type{T},
+)::String where {T<:optcomponent"ComponentBuilder:LocalSearch:FI"}
+    return "LocalSearch"
+end
+function get_return_type_from_builder(
+    ::Type{T},
+)::String where {T<:optcomponent"ComponentBuilder:LocalSearch:BI"}
+    return "LocalSearch"
+end
+
+function get_return_type_from_builder(::Type{T})::String where {T<:Component}
+    error("caiu onde nao devia")
+end

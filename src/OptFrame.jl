@@ -323,11 +323,21 @@ function create_component_list(engine::Engine, string_list::String, list_type::S
     factory = engine.hf
     char_list = Cstring(pointer(string_list))
     char_type = Cstring(pointer(list_type))
-    return optframe_api1d_create_component_list(
+    index = optframe_api1d_create_component_list(
         factory::Ptr{Cvoid},
         char_list::Cstring,
         char_type::Cstring,
     )::Cint
+    return Component(list_type, index)
+end
+
+function create_component_list(
+    engine::Engine,
+    components::Vector{T},
+)::Component where {T<:Component}
+    list_type = "$(T.parameters[1])[]"
+    string_list = "[ $(join(components, " ")) ]"
+    return create_component_list(engine, string_list, list_type)
 end
 
 function optframe_api1d_engine_list_builders(engine::Ptr{Cvoid}, list_type::Cstring)
@@ -452,11 +462,13 @@ function build_local_search(engine::Engine, builder::String, build_string::Strin
     factory = engine.hf
     cstr_builder = Cstring(pointer(builder))
     cstr_build_string = Cstring(pointer(build_string))
-    return optframe_api1d_build_local_search(
+    index = optframe_api1d_build_local_search(
         factory::Ptr{Cvoid},
         cstr_builder::Cstring,
         cstr_build_string::Cstring,
     )::Cint
+    return_type = get_return_type_from_builder(Component{Symbol(builder)})
+    return Component(return_type, index)
 end
 
 function optframe_api1d_build_component(
@@ -484,12 +496,13 @@ function build_component(
     cstr_builder = Cstring(pointer(builder))
     cstr_build_string = Cstring(pointer(build_string))
     cstr_component_type = Cstring(pointer(component_type))
-    return optframe_api1d_build_component(
+    index = optframe_api1d_build_component(
         factory::Ptr{Cvoid},
         cstr_builder::Cstring,
         cstr_build_string::Cstring,
         cstr_component_type::Cstring,
     )::Cint
+    return Component(component_type, index)
 end
 
 struct SearchOutput

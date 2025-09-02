@@ -125,6 +125,15 @@ function get_simulated_annealing_builder_strings(
     "OptFrame:GeneralEvaluator:Evaluator $id_evaluator OptFrame:InitialSearch $id_initial_search OptFrame:NS $id_ns 0.995 1000 10000"
 end
 
+function get_simulated_annealing_builder_strings(
+    evaluator::OptFrame.optcomponent"GeneralEvaluator:Evaluator",
+    initial_search::OptFrame.optcomponent"InitialSearch",
+    ns::OptFrame.optcomponent"NS[]",
+)
+    return "OptFrame:ComponentBuilder:GlobalSearch:SA:BasicSA",
+    "$evaluator $initial_search $ns 0.995 1000 10000"
+end
+
 function build_global_search_simulated_annealing(
     engine::OptFrame.Engine,
     id_evaluator::Integer,
@@ -149,9 +158,9 @@ function build_local_search(
     id_evaluator::Integer,
     id_nsseq::Integer,
     is_best_improvement::Bool,
-)::Integer
+)::OptFrame.Component
     improvement_strategy = is_best_improvement ? "BI" : "FI"
-    ls_idx = OptFrame.build_local_search(
+    return OptFrame.build_local_search(
         engine,
         "OptFrame:ComponentBuilder:LocalSearch:$improvement_strategy",
         "OptFrame:GeneralEvaluator:Evaluator $id_evaluator  OptFrame:NS:NSFind:NSSeq $id_nsseq",
@@ -161,14 +170,14 @@ end
 
 function build_vnd_local_search(
     engine::OptFrame.Engine,
-    evaluator_index::Integer,
-    local_search_list_index::Integer,
-)::Integer
+    evaluator::OptFrame.optcomponent"GeneralEvaluator",
+    local_search_list::OptFrame.optcomponent"LocalSearch[]",
+)::OptFrame.Component
     return OptFrame.build_component(
         engine,
         "OptFrame:ComponentBuilder:LocalSearch:VND",
-        "OptFrame:GeneralEvaluator:Evaluator $evaluator_index  OptFrame:LocalSearch[] $local_search_list_index",
-        "OptFrame:LocalSearch:VND",
+        "$evaluator $local_search_list",
+        "OptFrame:LocalSearch",
     )
 end
 
@@ -176,12 +185,26 @@ function build_ils_basic_perturbation(
     engine::OptFrame.Engine,
     evaluator_index::Integer,
     ns_list_index::Integer,
-)::Integer
+)::OptFrame.Component
     return OptFrame.build_component(
         engine,
         "OptFrame:ComponentBuilder:ILS:LevelPert:LPlus2",
         "OptFrame:GeneralEvaluator:Evaluator $evaluator_index  " *
         "OptFrame:NS $ns_list_index",
+        "OptFrame:ILS:LevelPert",
+    )
+end
+
+
+function build_ils_basic_perturbation(
+    engine::OptFrame.Engine,
+    evaluator::OptFrame.optcomponent"GeneralEvaluator",
+    ns::OptFrame.optcomponent"NS",
+)::OptFrame.Component
+    return OptFrame.build_component(
+        engine,
+        "OptFrame:ComponentBuilder:ILS:LevelPert:LPlus2",
+        "$evaluator $ns",
         "OptFrame:ILS:LevelPert",
     )
 end
@@ -203,6 +226,20 @@ function get_ils_builder_string(
     "$max_iterations $max_perturbation_level"
 end
 
+function get_ils_builder_string(
+    evaluator::OptFrame.optcomponent"GeneralEvaluator",
+    initial_search::OptFrame.optcomponent"InitialSearch",
+    local_search::OptFrame.Component,
+    ils_perturbation::OptFrame.optcomponent"ILS:LevelPert",
+    max_iterations::Integer,
+    max_perturbation_level::Integer,
+)
+    return "OptFrame:ComponentBuilder:SingleObjSearch:ILS:ILSLevels",
+    "$evaluator $initial_search $local_search $ils_perturbation " *
+    "$max_iterations $max_perturbation_level"
+end
+
+
 function build_ils_single_obj_search(engine::OptFrame.Engine, builder::String)::Integer
     constructor, _ = get_ils_builder_string(0, 0, 0, 0, 0, 0)
     return OptFrame.build_single_obj_search(engine, constructor, builder)
@@ -210,18 +247,18 @@ end
 
 function build_ils_single_obj_search(
     engine::OptFrame.Engine,
-    evaluator_index::Integer,
-    initial_search_index::Integer,
-    local_search_index::Integer,
-    ils_perturbation_index::Integer,
+    evaluator::OptFrame.optcomponent"GeneralEvaluator",
+    initial_search::OptFrame.optcomponent"InitialSearch",
+    local_search::OptFrame.optcomponent"LocalSearch",
+    ils_perturbation::OptFrame.optcomponent"ILS:LevelPert",
     max_iterations::Integer,
     max_perturbation_level::Integer,
 )::Integer
     constructor, builder = get_ils_builder_string(
-        evaluator_index,
-        initial_search_index,
-        local_search_index,
-        ils_perturbation_index,
+        evaluator,
+        initial_search,
+        local_search,
+        ils_perturbation,
         max_iterations,
         max_perturbation_level,
     )
