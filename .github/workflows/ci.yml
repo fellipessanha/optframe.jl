@@ -16,10 +16,10 @@ jobs:
         with:
           version: '1'
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Instantiate packages
+        run: make instantiate
       - name: Test check
-        shell: julia --proj --color=yes {0}
-        run: |
-          using Pkg
-          Pkg.add("Test")
-          Pkg.test(;coverage=true)
+        run: make test_lib
 

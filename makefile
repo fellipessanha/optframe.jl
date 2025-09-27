@@ -12,11 +12,11 @@ test_lib: build/optframe_lib.so
 	julia --project -e 'import Pkg; Pkg.test()'
 
 instantiate:
-	julia --proj=.                  -e 'import Pkg; Pkg.instantiate()'
-	julia --proj=./OptFrameTSP      -e 'import Pkg; Pkg.develop(; path = "."); Pkg.instantiate()'
-	julia --proj=./OptFrameKnapsack -e 'import Pkg; Pkg.develop(; path = "."); Pkg.instantiate()'
+	julia --color=yes --proj=.                  -e 'import Pkg; Pkg.instantiate()'
+	julia --color=yes --proj=./OptFrameTSP      -e 'import Pkg; Pkg.develop(; path = "."); Pkg.instantiate()'
+	julia --color=yes --proj=./OptFrameKnapsack -e 'import Pkg; Pkg.develop(; path = "."); Pkg.instantiate()'
 	
-	julia --proj=./test -e 'import Pkg; Pkg.develop([Pkg.PackageSpec(; path = "./OptFrameTSP"), Pkg.PackageSpec(; path = "./OptFrameKnapsack")]); Pkg.instantiate();'
+	julia --color=yes --proj=./test -e 'import Pkg; Pkg.develop([Pkg.PackageSpec(; path = "./OptFrameTSP"), Pkg.PackageSpec(; path = "./OptFrameKnapsack")]); Pkg.instantiate();'
 
 clean:
 	rm -f build/optframe_lib.so
