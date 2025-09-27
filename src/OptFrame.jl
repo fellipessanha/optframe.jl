@@ -12,6 +12,7 @@ export experimental_set_parameter
 export add_ns_v2
 
 include("macros.jl")
+include("Component.jl")
 
 const libpath = joinpath(@__DIR__, "..", "build", "optframe_lib.so")
 
@@ -37,16 +38,6 @@ mutable struct Engine
     Engine() = init_engine(0)
 end
 
-struct Component{T}
-    index::Integer
-
-    function Component{T}(idx::Integer) where {T}
-        @assert(idx >= 0, "Index must be non-negative")
-        @assert(T isa Symbol, "Component type must be a Symbol")
-
-        return new{T}(idx)
-    end
-end
 
 include("Random.jl")
 
@@ -173,7 +164,7 @@ function add_constructive(
         to_string_callback_ptr,
         decref_callback_ptr,
     )
-    return optcomponent"OptFrame:Constructive"(idx_c)
+    return optcomponent"Constructive"(idx_c)
 end
 
 function optframe_api1d_add_evaluator(
@@ -200,7 +191,7 @@ function add_evaluator(
     # TODO: keep function 'ev_callback_ptr'?
     idx_ev =
         optframe_api1d_add_evaluator(e.hf, ev_callback_ptr, Int32(min_or_max), problemCtx)
-    return optcomponent"OptFrame:GeneralEvaluator"(idx_ev)
+    return optcomponent"GeneralEvaluator"(idx_ev)
 end
 
 function optframe_api1d_add_ns(
@@ -243,7 +234,7 @@ function add_ns(
         problemCtx,
         decref_callback_ptr,
     )
-    return optcomponent"OptFrame:NS"(idx_ns)
+    return optcomponent"NS"(idx_ns)
 end
 
 struct PairMoveDoubleLib
@@ -295,7 +286,7 @@ function add_ns_v2(
         decref_callback_ptr,
         fmove_apply_update,
     )
-    return optcomponent"OptFrame:NS"(idx_ns)
+    return optcomponent"NS"(idx_ns)
 end
 
 
@@ -332,11 +323,21 @@ function create_component_list(engine::Engine, string_list::String, list_type::S
     factory = engine.hf
     char_list = Cstring(pointer(string_list))
     char_type = Cstring(pointer(list_type))
-    return optframe_api1d_create_component_list(
+    index = optframe_api1d_create_component_list(
         factory::Ptr{Cvoid},
         char_list::Cstring,
         char_type::Cstring,
     )::Cint
+    return Component(list_type, index)
+end
+
+function create_component_list(
+    engine::Engine,
+    components::Vector{T},
+)::Component where {T<:Component}
+    list_type = "$(T.parameters[1])[]"
+    string_list = "[ $(join(components, " ")) ]"
+    return create_component_list(engine, string_list, list_type)
 end
 
 function optframe_api1d_engine_list_builders(engine::Ptr{Cvoid}, list_type::Cstring)
@@ -386,13 +387,13 @@ end
 
 function create_initial_search(
     engine::Engine,
-    evaluator::optcomponent"OptFrame:GeneralEvaluator",
-    constructor::optcomponent"OptFrame:Constructive",
-)::optcomponent"OptFrame:InitialSearch"
+    evaluator::optcomponent"GeneralEvaluator",
+    constructor::optcomponent"Constructive",
+)::optcomponent"InitialSearch"
     is_idx =
         optframe_api1d_create_initial_search(engine.hf, evaluator.index, constructor.index)
 
-    return optcomponent"OptFrame:InitialSearch"(is_idx)
+    return optcomponent"InitialSearch"(is_idx)
 end
 
 function optframe_api1d_build_global(
@@ -461,11 +462,13 @@ function build_local_search(engine::Engine, builder::String, build_string::Strin
     factory = engine.hf
     cstr_builder = Cstring(pointer(builder))
     cstr_build_string = Cstring(pointer(build_string))
-    return optframe_api1d_build_local_search(
+    index = optframe_api1d_build_local_search(
         factory::Ptr{Cvoid},
         cstr_builder::Cstring,
         cstr_build_string::Cstring,
     )::Cint
+    return_type = get_return_type_from_builder(Component{Symbol(builder)})
+    return Component(return_type, index)
 end
 
 function optframe_api1d_build_component(
@@ -493,12 +496,13 @@ function build_component(
     cstr_builder = Cstring(pointer(builder))
     cstr_build_string = Cstring(pointer(build_string))
     cstr_component_type = Cstring(pointer(component_type))
-    return optframe_api1d_build_component(
+    index = optframe_api1d_build_component(
         factory::Ptr{Cvoid},
         cstr_builder::Cstring,
         cstr_build_string::Cstring,
         cstr_component_type::Cstring,
     )::Cint
+    return Component(component_type, index)
 end
 
 struct SearchOutput

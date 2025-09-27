@@ -1,10 +1,12 @@
 macro optcomponent_str(str)
-    base_string = "OptFrame:"
     @assert(
-        occursin(base_string, str),
-        "OptFrame components must be prefixed with $(base_string)"
+        !startswith(str, "OptFrame:"),
+        "optcomponent should not prefix 'OptFrame:', as it is added automatically."
     )
-    return :(Component{Symbol($str)})
+    let
+        component_name = "OptFrame:$(str)"
+        return :(Component{Symbol($(esc(component_name)))})
+    end
 end
 
 @doc raw"""
